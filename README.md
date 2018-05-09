@@ -94,7 +94,7 @@ int main()
 {
     // Initialize model:
     auto model = pt::create("example.model");
-	// REQUIRE(model);
+    // REQUIRE(model);
 
     // Create input tensor:
     pt::Tensor in(10);
@@ -103,7 +103,7 @@ int main()
     // Run prediction:
     pt::Tensor out;
     bool success = model->predict(std::move(in), out);
-	// REQUIRE(success);
+    // REQUIRE(success);
 	
     // Print output:
     std::cout << out << std::endl;
