@@ -1,6 +1,6 @@
-# PocketTensor
+# pocket-tensor
 
-PocketTensor is a [Kerasify](https://github.com/moof2k/kerasify) fork designed for running trained Keras models from a C++ application on embedded devices.
+pocket-tensor is a [Kerasify](https://github.com/moof2k/kerasify) fork designed for running trained Keras models from a C++ application on embedded devices.
 
 ## Design goals
 
@@ -19,7 +19,7 @@ PocketTensor is a [Kerasify](https://github.com/moof2k/kerasify) fork designed f
 
 ## Hardware requirements
 
-Since there's no GPU support, by default PocketTensor requires the following CPU SIMD instruction sets:
+Since there's no GPU support, by default pocket-tensor requires the following CPU SIMD instruction sets:
 
 * ARM: NEON with floating point support.
 * x86: AVX.
@@ -30,7 +30,7 @@ Required SIMD instruction sets are specified in the `pt_tweakme.h` file, so they
 
 Since a copy of libsimdpp comes bundled with this library, there's no external dependencies required, so the only software requirements are a C++11-compatible compiler and CMake >= 3.4.  
 
-PocketTensor has been tested with these compilers: 
+pocket-tensor has been tested with these compilers: 
 
 * GCC 4.9.
 * MSVC 2017.

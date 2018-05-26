@@ -47,10 +47,10 @@ set(PT_LIBSIMDPP_PATH "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/libsimdpp" CACHE ST
 add_subdirectory(lib)
 
 # Define build all artefacts option:
-option(PT_BUILD_ALL "Build all PocketTensor artefacts" OFF)
+option(PT_BUILD_ALL "Build all pocket-tensor artefacts" OFF)
 
 # Add tests subdirectory:
-option(PT_BUILD_TESTS "Build PocketTensor tests" OFF)
+option(PT_BUILD_TESTS "Build pocket-tensor tests" OFF)
 if(PT_BUILD_TESTS OR PT_BUILD_ALL)
     add_subdirectory(tests)
 endif()
