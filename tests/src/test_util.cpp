@@ -3,6 +3,7 @@
 #include <chrono>
 #include <iostream>
 #include "pt_model.h"
+#include "pt_dispatcher.h"
 
 void testModel(pt::Tensor& in, const pt::Tensor& expected, const char* modelFileName, float eps)
 {
@@ -15,8 +16,9 @@ void testModel(pt::Tensor& in, const pt::Tensor& expected, const char* modelFile
     REQUIRE(model);
 
     pt::Tensor out;
+    pt::Dispatcher dispatcher;
     auto startTime = std::chrono::high_resolution_clock::now();
-    bool success = model->predict(in, out);
+    bool success = model->predict(dispatcher, in, out);
     auto elapsedTime = std::chrono::high_resolution_clock::now() - startTime;
     REQUIRE(success);
     REQUIRE(out.isValid());
@@ -25,7 +27,7 @@ void testModel(pt::Tensor& in, const pt::Tensor& expected, const char* modelFile
     {
         if(std::fabs(out(i) - expected(i)) >= pt::FloatType(eps))
         {
-            std::cout << "Float diff: " << std::fabs(out(i) - expected(i)) << std::endl;
+	    std::cout << "Diff: " << std::fabs(out(i) - expected(i)) << std::endl;
             REQUIRE(std::fabs(out(i) - expected(i)) < pt::FloatType(eps));
         }
     }
