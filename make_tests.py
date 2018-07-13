@@ -96,7 +96,7 @@ def output_testcase(model, test_x, test_y, name, eps):
         y_shape, y_data = c_array(predict_y[0])
 
         f.write(TEST_CASE % (
-	    name, x_shape, x_data, y_shape, y_data, name, eps))
+            name, x_shape, x_data, y_shape, y_data, name, eps))
 
 
 ''' Dense 1x1 '''

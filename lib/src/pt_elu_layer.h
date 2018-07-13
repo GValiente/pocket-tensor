@@ -20,7 +20,7 @@ class EluLayer : public Layer
 public:
     static std::unique_ptr<EluLayer> create(std::istream& stream);
 
-    bool apply(const Config& config, Tensor&& in, Tensor& out) const final;
+    bool apply(LayerData& layerData) const final;
 
 protected:
     FloatType _alpha;

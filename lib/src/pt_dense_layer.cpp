@@ -7,6 +7,9 @@
 
 #include "pt_dense_layer.h"
 
+#include <array>
+#include "pt_dispatcher.h"
+#include "pt_layer_data.h"
 #include "pt_multiply_add.h"
 #include "pt_logger.h"
 
@@ -16,18 +19,64 @@ namespace pt
 namespace
 {
     template<class MultiplyAddType>
-    void multiplyAddImpl(const Tensor& weights, const Tensor& in, Tensor& out) noexcept
+    void multiplyAddImpl(const Tensor& weights, LayerData& layerData) noexcept
     {
-        const auto& weightsDims = weights.getDims();
-        auto wi = int(weightsDims[1]);
-        auto inIt = in.begin();
-        auto outIt = out.begin();
-        MultiplyAddType multiplyAdd;
-
-        for(auto w = weights.begin(), wl = weights.end(); w != wl; w += wi)
+        struct Task
         {
-            *(outIt++) += multiplyAdd(&*inIt, &*w, wi);
+            const Tensor* weights;
+            LayerData* layerData;
+            int threads;
+            int taskId;
+
+            void operator()() noexcept
+            {
+                const Tensor& in = layerData->in;
+                Tensor& out = layerData->out;
+
+                const auto& weightsDims = weights->getDims();
+                auto wInc = int(weightsDims[1]);
+                auto inIt = in.begin();
+                auto outIt = out.begin();
+                MultiplyAddType multiplyAdd;
+
+                auto weightsBegin = weights->begin();
+                int its = int(weights->end() - weightsBegin) / wInc;
+                int taskIts = its / threads;
+                int taskBegin = taskIts * taskId;
+                int taskEnd;
+
+                if(taskId == threads - 1)
+                {
+                    taskEnd = its;
+                }
+                else
+                {
+                    taskEnd = taskBegin + taskIts;
+                }
+
+                outIt += taskIts * taskId;
+
+                for(auto wIt = weightsBegin + (taskBegin * wInc), wEnd = weightsBegin + (taskEnd * wInc);
+                    wIt != wEnd; wIt += wInc)
+                {
+                    *outIt += multiplyAdd(&*inIt, &*wIt, wInc);
+                    ++outIt;
+                }
+            }
+        };
+
+        std::array<Task, PT_MAX_CPU_THREADS> tasks;
+        Dispatcher& dispatcher = layerData.dispatcher;
+        int threads = int(dispatcher.threads());
+
+        for(int taskId = 0; taskId != threads; ++taskId)
+        {
+            Task& task = tasks[std::size_t(taskId)];
+            task = Task{ &weights, &layerData, threads, taskId };
+            dispatcher.add([&task]{ task(); });
         }
+
+        dispatcher.join();
     }
 }
 
@@ -61,14 +110,15 @@ std::unique_ptr<DenseLayer> DenseLayer::create(std::istream& stream)
                                                       std::move(activation)));
 }
 
-bool DenseLayer::apply(const Config& config, Tensor&& in, Tensor& out) const
+bool DenseLayer::apply(LayerData& layerData) const
 {
+    const Tensor& in = layerData.in;
     const auto& iw = in.getDims();
 
     if(iw.size() != 1)
     {
         PT_LOG_ERROR << "Input tensor dims count must be 1" <<
-                            " (input dims: " << VectorPrinter<std::size_t>{in.getUnpaddedDims()} << ")" << std::endl;
+                            " (input dims: " << VectorPrinter<std::size_t>{ iw } << ")" << std::endl;
         return false;
     }
 
@@ -77,23 +127,31 @@ bool DenseLayer::apply(const Config& config, Tensor&& in, Tensor& out) const
     if(iw[0] != ww[1])
     {
         PT_LOG_ERROR << "Input tensor dims[0] must be the same as weights dims[1]" <<
-                            " (input dims: " << VectorPrinter<std::size_t>{in.getUnpaddedDims()} << ")" <<
-                            " (weights dims: " << VectorPrinter<std::size_t>{_weights.getUnpaddedDims()} << ")" << std::endl;
+                            " (input dims: " << VectorPrinter<std::size_t>{ iw } << ")" <<
+                            " (weights dims: " << VectorPrinter<std::size_t>{ ww } << ")" << std::endl;
         return false;
     }
 
+    Tensor& out = layerData.out;
     _biases.copyTo(out);
 
-    if(PT_LOOP_UNROLLING_ENABLE && ww[1] % (Tensor::VectorSize * 2) == 0)
+    int threads = int(layerData.dispatcher.threads());
+    int threadSize = int(ww[1]) / threads;
+
+    if(PT_LOOP_UNROLLING_ENABLE && threadSize && threadSize % (Tensor::VectorSize * 2) == 0)
     {
-        multiplyAddImpl<Vector2MultiplyAdd>(_weights, in, out);
+        multiplyAddImpl<Vector2MultiplyAdd>(_weights, layerData);
+    }
+    else if(threadSize && threadSize % Tensor::VectorSize == 0)
+    {
+        multiplyAddImpl<VectorMultiplyAdd>(_weights, layerData);
     }
     else
     {
-        multiplyAddImpl<VectorMultiplyAdd>(_weights, in, out);
+        multiplyAddImpl<ScalarMultiplyAdd>(_weights, layerData);
     }
 
-    _activation->apply(config, out);
+    _activation->apply(out);
     return true;
 }
 
@@ -103,8 +161,6 @@ DenseLayer::DenseLayer(Tensor&& weights, Tensor&& biases,
     _biases(std::move(biases)),
     _activation(std::move(activation))
 {
-    _weights.addPadding();
-    _biases.addPadding();
 }
 
 }

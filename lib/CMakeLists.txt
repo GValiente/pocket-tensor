@@ -4,6 +4,7 @@ project(pocket-tensor)
 # Define sources:
 set(SOURCES
     src/pt_tensor.cpp
+    src/pt_dispatcher.cpp
     src/pt_layer.cpp
     src/pt_dense_layer.cpp
     src/pt_conv_1d_layer.cpp
@@ -30,3 +31,8 @@ target_include_directories(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
     PUBLIC ${PT_LIBSIMDPP_PATH}
 )
+
+# Include pthread (GCC only):
+if(CMAKE_COMPILER_IS_GNUCC)
+    target_link_libraries(${PROJECT_NAME} pthread)
+endif()

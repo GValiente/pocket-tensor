@@ -21,6 +21,9 @@
     #define PT_LOOP_UNROLLING_ENABLE 0
 #endif
 
+// Define max CPU threads:
+#define PT_MAX_CPU_THREADS 16
+
 // Define libsimdpp arch:
 #ifdef __arm__
     #define SIMDPP_ARCH_ARM_NEON_FLT_SP

@@ -15,15 +15,26 @@ public:
 
     ReluActivationLayer() = default;
 
-    void apply(const Config&, Tensor& out) const final
+    void apply(Tensor& out) const final
     {
-        Tensor::Vector zero = makeVector(Tensor::Type(0));
-
-        for(auto it = out.begin(), end = out.end(); it != end; it += Tensor::VectorSize)
+        if(out.getSize() % Tensor::VectorSize == 0)
         {
-            auto ptr = &*it;
-            Tensor::Vector v = simdpp::load(ptr);
-            simdpp::store(ptr, simdpp::max(v, zero));
+            Tensor::Vector zero = makeVector(Tensor::Type(0));
+
+            for(auto it = out.begin(), end = out.end(); it != end; it += Tensor::VectorSize)
+            {
+                auto ptr = &*it;
+                Tensor::Vector v = simdpp::load(ptr);
+                simdpp::store(ptr, simdpp::max(v, zero));
+            }
+        }
+        else
+        {
+            for(auto it = out.begin(), end = out.end(); it != end; ++it)
+            {
+                auto& x = *it;
+                x = std::max(x, Tensor::Type(0));
+            }
         }
     }
 };

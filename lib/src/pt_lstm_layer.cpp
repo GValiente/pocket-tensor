@@ -8,6 +8,8 @@
 #include "pt_lstm_layer.h"
 
 #include "pt_parser.h"
+#include "pt_dispatcher.h"
+#include "pt_layer_data.h"
 #include "pt_logger.h"
 
 namespace pt
@@ -15,6 +17,7 @@ namespace pt
 
 struct LstmLayer::TempData
 {
+    Dispatcher dummyDispatcher;
     Tensor ht;
     Tensor ct;
     Tensor last;
@@ -26,12 +29,19 @@ struct LstmLayer::TempData
     Tensor tmp1;
     Tensor tmp2;
 
+    explicit TempData(std::size_t outDim) :
+        dummyDispatcher(1)
+    {
+        ht.resize(1, outDim);
+        ct.resize(1, outDim);
+    }
+
     void dot(const Tensor& w, const Tensor& b, const Tensor& u, Tensor& out)
     {
-        inRow.dot(w, tmp1);
-        tmp1.add(b, tmp2);
-        ht.dot(u, tmp1);
-        tmp2.add(tmp1, out);
+        inRow.dot(w, tmp1, dummyDispatcher);
+        tmp1.add(b, tmp2, dummyDispatcher);
+        ht.dot(u, tmp1, dummyDispatcher);
+        tmp2.add(tmp1, out, dummyDispatcher);
     }
 };
 
@@ -165,34 +175,34 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
                                                     std::move(activation), returnSequences));
 }
 
-bool LstmLayer::apply(const Config& config, Tensor&& in, Tensor& out) const
+bool LstmLayer::apply(LayerData& layerData) const
 {
+    const Tensor& in = layerData.in;
     const auto& iw = in.getDims();
 
     if(iw.size() != 2)
     {
         PT_LOG_ERROR << "Input tensor dims count must be 2" <<
-                            " (input dims: " << VectorPrinter<std::size_t>{in.getUnpaddedDims()} << ")" << std::endl;
+                            " (input dims: " << VectorPrinter<std::size_t>{ iw } << ")" << std::endl;
         return false;
     }
 
-    auto outDim = _bo.getUnpaddedDims()[1];
+    auto outDim = _bo.getDims()[1];
     auto steps = iw[0];
 
-    TempData tempData;
-    tempData.ht.resizeWithPadding(1, outDim);
-    tempData.ct.resizeWithPadding(1, outDim);
+    TempData tempData(outDim);
+    Tensor& out = layerData.out;
 
     if(_returnSequences)
     {
-        out.resizeWithPadding(steps, outDim);
+        out.resize(steps, outDim);
 
         auto outIt = out.begin();
 
         for(std::size_t s = 0; s != steps; ++s)
         {
             in.select(s, tempData.inRow);
-            _step(config, tempData, tempData.last);
+            _step(tempData, tempData.last);
             std::copy(tempData.last.begin(), tempData.last.end(), outIt);
             outIt += tempData.last.end() - tempData.last.begin();
         }
@@ -202,7 +212,7 @@ bool LstmLayer::apply(const Config& config, Tensor&& in, Tensor& out) const
         for(std::size_t s = 0; s != steps; ++s)
         {
             in.select(s, tempData.inRow);
-            _step(config, tempData, out);
+            _step(tempData, out);
         }
     }
 
@@ -230,40 +240,37 @@ LstmLayer::LstmLayer(Tensor&& wi, Tensor&& ui, Tensor&& bi, Tensor&& wf, Tensor&
     _activation(std::move(activation)),
     _returnSequences(returnSequences)
 {
-    _wi.addPadding();
-    _ui.addPadding();
-    _bi.addPadding();
-    _wf.addPadding();
-    _uf.addPadding();
-    _bf.addPadding();
-    _wc.addPadding();
-    _uc.addPadding();
-    _bc.addPadding();
-    _wo.addPadding();
-    _uo.addPadding();
-    _bo.addPadding();
 }
 
-void LstmLayer::_step(const Config& config, TempData& tempData, Tensor& out) const
+void LstmLayer::_step(TempData& tempData, Tensor& out) const
 {
     tempData.dot(_wi, _bi, _ui, tempData.i);
+    _innerActivation->apply(tempData.i);
+
     tempData.dot(_wf, _bf, _uf, tempData.f);
+    _innerActivation->apply(tempData.f);
+
     tempData.dot(_wc, _bc, _uc, tempData.c);
+    _activation->apply(tempData.c);
+
     tempData.dot(_wo, _bo, _uo, tempData.o);
+    _innerActivation->apply(tempData.o);
 
-    _innerActivation->apply(config, tempData.i);
-    _innerActivation->apply(config, tempData.f);
-    _activation->apply(config, tempData.c);
-    _innerActivation->apply(config, tempData.o);
+    // join
 
-    tempData.f.multiply(tempData.ct, tempData.tmp1);
-    tempData.i.multiply(tempData.c, tempData.tmp2);
-    tempData.tmp1.add(tempData.tmp2, tempData.ct);
+    tempData.f.multiply(tempData.ct, tempData.tmp1, tempData.dummyDispatcher);
+
+    tempData.i.multiply(tempData.c, tempData.tmp2, tempData.dummyDispatcher);
+
+    // join
+    // seq
+
+    tempData.tmp1.add(tempData.tmp2, tempData.ct, tempData.dummyDispatcher);
 
     tempData.ct.copyTo(tempData.c);
-    _activation->apply(config, tempData.c);
+    _activation->apply(tempData.c);
 
-    tempData.o.multiply(tempData.c, tempData.ht);
+    tempData.o.multiply(tempData.c, tempData.ht, tempData.dummyDispatcher);
     tempData.ht.copyTo(out);
 }
 

@@ -7,6 +7,7 @@
 
 #include "pt_batch_normalization_layer.h"
 
+#include "pt_layer_data.h"
 #include "pt_logger.h"
 
 namespace pt
@@ -40,17 +41,19 @@ std::unique_ptr<BatchNormalizationLayer> BatchNormalizationLayer::create(std::is
                 new BatchNormalizationLayer(std::move(*weights), std::move(*biases)));
 }
 
-bool BatchNormalizationLayer::apply(const Config&, Tensor&& in, Tensor& out) const
+bool BatchNormalizationLayer::apply(LayerData& layerData) const
 {
+    const Tensor& in = layerData.in;
+
     if(in.getDims() != _weights.getDims())
     {
         PT_LOG_ERROR << "Input and weights tensor dims are different" <<
-                            " (input dims: " << VectorPrinter<std::size_t>{in.getUnpaddedDims()} << ")" <<
-                            " (weights dims: " << VectorPrinter<std::size_t>{_weights.getUnpaddedDims()} << ")" << std::endl;
+                            " (input dims: " << VectorPrinter<std::size_t>{ in.getDims() } << ")" <<
+                            " (weights dims: " << VectorPrinter<std::size_t>{ _weights.getDims() } << ")" << std::endl;
         return false;
     }
 
-    in.fma(_weights, _biases, out);
+    in.fma(_weights, _biases, layerData.out, layerData.dispatcher);
     return true;
 }
 
@@ -58,8 +61,6 @@ BatchNormalizationLayer::BatchNormalizationLayer(Tensor&& weights, Tensor&& bias
     _weights(std::move(weights)),
     _biases(std::move(biases))
 {
-    _weights.addPadding();
-    _biases.addPadding();
 }
 
 }

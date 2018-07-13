@@ -7,6 +7,9 @@
 
 #include "pt_conv_1d_layer.h"
 
+#include <array>
+#include "pt_dispatcher.h"
+#include "pt_layer_data.h"
 #include "pt_multiply_add.h"
 #include "pt_logger.h"
 
@@ -16,38 +19,78 @@ namespace pt
 namespace
 {
     template<class MultiplyAddType>
-    void multiplyAddImpl(const Tensor& weights, const Tensor& biases, const Tensor& in,
-                         Tensor& out) noexcept
+    void multiplyAddImpl(const Tensor& weights, const Tensor& biases, LayerData& layerData)
     {
-        const auto& ww = weights.getDims();
-        const auto& ow = out.getDims();
-        auto outInc = int(ow[1]);
-        auto ws0 = int(ww[2] * ww[1]);
-        auto ws1 = int(ww[2]);
-
-        auto tx = int(ow[0]);
-
-        auto inBegin = in.begin();
-        auto outBegin = out.begin();
-        auto wBegin = weights.begin();
-        auto wEnd = weights.end();
-        auto bBegin = biases.begin();
-        MultiplyAddType multiplyAdd;
-
-        for(int x = 0; x != tx; ++x)
+        struct Task
         {
-            auto inIt = inBegin + x * ws1;
-            auto outIt = outBegin;
-            auto bIt = bBegin;
-            outBegin += outInc;
+            const Tensor* weights;
+            const Tensor* biases;
+            LayerData* layerData;
+            int threads;
+            int taskId;
 
-            for(auto w0 = wBegin; w0 != wEnd; w0 += ws0)
+            void operator()() noexcept
             {
-                *outIt = *bIt + multiplyAdd(&*inIt, &*w0, ws0);
-                ++outIt;
-                ++bIt;
+                const Tensor& in = layerData->in;
+                Tensor& out = layerData->out;
+
+                const auto& ww = weights->getDims();
+                const auto& ow = out.getDims();
+                auto outInc = int(ow[1]);
+                auto wInc = int(ww[2] * ww[1]);
+                auto wInc2 = int(ww[2]);
+
+                auto tx = int(ow[0]);
+
+                auto inBegin = in.begin();
+                auto outBegin = out.begin();
+                auto wBegin = weights->begin();
+                auto wEnd = weights->end();
+                auto bBegin = biases->begin();
+                MultiplyAddType multiplyAdd;
+
+                int its = tx;
+                int taskIts = its / threads;
+                int taskBegin = taskIts * taskId;
+                int taskEnd;
+
+                if(taskId == threads - 1)
+                {
+                    taskEnd = its;
+                }
+                else
+                {
+                    taskEnd = taskBegin + taskIts;
+                }
+
+                for(int x = taskBegin; x != taskEnd; ++x)
+                {
+                    auto inIt = inBegin + x * wInc2;
+                    auto outIt = outBegin + x * outInc;
+                    auto bIt = bBegin;
+
+                    for(auto wIt = wBegin; wIt != wEnd; wIt += wInc)
+                    {
+                        *outIt = *bIt + multiplyAdd(&*inIt, &*wIt, wInc);
+                        ++outIt;
+                        ++bIt;
+                    }
+                }
             }
+        };
+
+        std::array<Task, PT_MAX_CPU_THREADS> tasks;
+        Dispatcher& dispatcher = layerData.dispatcher;
+        int threads = int(dispatcher.threads());
+
+        for(int taskId = 0; taskId != threads; ++taskId)
+        {
+            Task& task = tasks[std::size_t(taskId)];
+            task = Task{ &weights, &biases, &layerData, threads, taskId };
+            dispatcher.add([&task]{ task(); });
         }
+
+        dispatcher.join();
     }
 }
 
@@ -81,14 +124,15 @@ std::unique_ptr<Conv1DLayer> Conv1DLayer::create(std::istream& stream)
                                                         std::move(activation)));
 }
 
-bool Conv1DLayer::apply(const Config& config, Tensor&& in, Tensor& out) const
+bool Conv1DLayer::apply(LayerData& layerData) const
 {
+    const Tensor& in = layerData.in;
     const auto& iw = in.getDims();
 
     if(iw.size() != 2)
     {
         PT_LOG_ERROR << "Input tensor dims count must be 2" <<
-                            " (input dims: " << VectorPrinter<std::size_t>{in.getUnpaddedDims()} << ")" << std::endl;
+                            " (input dims: " << VectorPrinter<std::size_t>{ iw } << ")" << std::endl;
         return false;
     }
 
@@ -97,24 +141,32 @@ bool Conv1DLayer::apply(const Config& config, Tensor&& in, Tensor& out) const
     if(iw[1] != ww[2])
     {
         PT_LOG_ERROR << "Input tensor dims[1] must be the same as weights dims[2]" <<
-                            " (input dims: " << VectorPrinter<std::size_t>{in.getUnpaddedDims()} << ")" <<
-                            " (weights dims: " << VectorPrinter<std::size_t>{_weights.getUnpaddedDims()} << ")" << std::endl;
+                            " (input dims: " << VectorPrinter<std::size_t>{ iw } << ")" <<
+                            " (weights dims: " << VectorPrinter<std::size_t>{ ww } << ")" << std::endl;
         return false;
     }
 
     auto offset = ww[1] - 1;
-    out.resizeWithPadding(iw[0] - offset, ww[0]);
+    Tensor& out = layerData.out;
+    out.resize(iw[0] - offset, ww[0]);
 
-    if(PT_LOOP_UNROLLING_ENABLE && (ww[2] * ww[1]) % (Tensor::VectorSize * 2) == 0)
+    int threads = int(layerData.dispatcher.threads());
+    int threadSize = int(ww[2] * ww[1]) / threads;
+
+    if(PT_LOOP_UNROLLING_ENABLE && threadSize && threadSize % (Tensor::VectorSize * 2) == 0)
     {
-        multiplyAddImpl<Vector2MultiplyAdd>(_weights, _biases, in, out);
+        multiplyAddImpl<Vector2MultiplyAdd>(_weights, _biases, layerData);
+    }
+    else if(threadSize && threadSize % Tensor::VectorSize == 0)
+    {
+        multiplyAddImpl<VectorMultiplyAdd>(_weights, _biases, layerData);
     }
     else
     {
-        multiplyAddImpl<VectorMultiplyAdd>(_weights, _biases, in, out);
+        multiplyAddImpl<ScalarMultiplyAdd>(_weights, _biases, layerData);
     }
 
-    _activation->apply(config, out);
+    _activation->apply(out);
     return true;
 }
 
@@ -124,8 +176,6 @@ Conv1DLayer::Conv1DLayer(Tensor&& weights, Tensor&& biases,
     _biases(std::move(biases)),
     _activation(std::move(activation))
 {
-    _weights.addPadding();
-    _biases.addPadding();
 }
 
 }

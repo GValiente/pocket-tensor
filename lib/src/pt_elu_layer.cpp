@@ -7,8 +7,8 @@
 
 #include "pt_elu_layer.h"
 
-#include "pt_tensor.h"
 #include "pt_parser.h"
+#include "pt_layer_data.h"
 
 namespace pt
 {
@@ -26,11 +26,11 @@ std::unique_ptr<EluLayer> EluLayer::create(std::istream& stream)
     return std::unique_ptr<EluLayer>(new EluLayer(FloatType(alpha)));
 }
 
-bool EluLayer::apply(const Config&, Tensor&& in, Tensor& out) const
+bool EluLayer::apply(LayerData& layerData) const
 {
-    out = std::move(in);
+    layerData.out = std::move(layerData.in);
 
-    for(FloatType& value : out)
+    for(FloatType& value : layerData.out)
     {
         if(value < 0)
         {

@@ -14,8 +14,7 @@
 namespace pt
 {
 
-class Tensor;
-class Config;
+struct LayerData;
 
 class Layer
 {
@@ -25,7 +24,7 @@ public:
 
     virtual ~Layer() noexcept;
 
-    virtual bool apply(const Config& config, Tensor&& in, Tensor& out) const = 0;
+    virtual bool apply(LayerData& layerData) const = 0;
 
 protected:
     Layer() = default;

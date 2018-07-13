@@ -21,7 +21,7 @@ public:
 
     LinearActivationLayer() = default;
 
-    void apply(const Config&, Tensor&) const final
+    void apply(Tensor&) const final
     {
     }
 };

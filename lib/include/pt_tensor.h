@@ -17,6 +17,8 @@
 namespace pt
 {
 
+class Dispatcher;
+
 class Tensor
 {
 
@@ -61,11 +63,6 @@ public:
     const DimsVector& getDims() const noexcept
     {
         return _dims;
-    }
-
-    const DimsVector& getUnpaddedDims() const noexcept
-    {
-        return _unpaddedDims;
     }
 
     std::size_t getSize() const noexcept
@@ -166,29 +163,12 @@ public:
 
     void resize(std::size_t i, std::size_t j, std::size_t k, std::size_t l);
 
-    void resizeWithPadding(std::size_t i);
-
-    void resizeWithPadding(std::size_t i, std::size_t j);
-
-    void resizeWithPadding(std::size_t i, std::size_t j, std::size_t k);
-
-    void resizeWithPadding(std::size_t i, std::size_t j, std::size_t k, std::size_t l);
-
     void setData(DataVector data) noexcept
     {
         PT_ASSERT(_data.size() == data.size());
 
         _data = std::move(data);
     }
-
-    bool hasPadding() const noexcept
-    {
-        return ! _unpaddedDims.empty();
-    }
-
-    void addPadding(bool copyData = true);
-
-    void removePadding(bool copyData = true);
 
     void fill(Type value) noexcept;
 
@@ -212,39 +192,39 @@ public:
         return output;
     }
 
-    void add(const Tensor& other, Tensor& out) const;
+    void add(const Tensor& other, Tensor& out, Dispatcher& dispatcher) const;
 
-    Tensor add(const Tensor& other) const
+    Tensor add(const Tensor& other, Dispatcher& dispatcher) const
     {
         Tensor output;
-        add(other, output);
+        add(other, output, dispatcher);
         return output;
     }
 
-    void multiply(const Tensor& other, Tensor& out) const;
+    void multiply(const Tensor& other, Tensor& out, Dispatcher& dispatcher) const;
 
-    Tensor multiply(const Tensor& other) const
+    Tensor multiply(const Tensor& other, Dispatcher& dispatcher) const
     {
         Tensor output;
-        multiply(other, output);
+        multiply(other, output, dispatcher);
         return output;
     }
 
-    void dot(const Tensor& other, Tensor& out) const;
+    void dot(const Tensor& other, Tensor& out, Dispatcher& dispatcher) const;
 
-    Tensor dot(const Tensor& other) const
+    Tensor dot(const Tensor& other, Dispatcher& dispatcher) const
     {
         Tensor output;
-        dot(other, output);
+        dot(other, output, dispatcher);
         return output;
     }
 
-    void fma(const Tensor& scale, const Tensor& bias, Tensor& out) const;
+    void fma(const Tensor& scale, const Tensor& bias, Tensor& out, Dispatcher& dispatcher) const;
 
-    Tensor fma(const Tensor& scale, const Tensor& bias) const
+    Tensor fma(const Tensor& scale, const Tensor& bias, Dispatcher& dispatcher) const
     {
         Tensor output;
-        fma(scale, bias, output);
+        fma(scale, bias, output, dispatcher);
         return output;
     }
 
@@ -256,7 +236,6 @@ public:
 
 protected:
     DimsVector _dims;
-    DimsVector _unpaddedDims;
     DataVector _data;
 
     static std::size_t getSizeImpl(const DimsVector& dims) noexcept

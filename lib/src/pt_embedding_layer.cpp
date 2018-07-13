@@ -7,6 +7,7 @@
 
 #include "pt_embedding_layer.h"
 
+#include "pt_layer_data.h"
 #include "pt_logger.h"
 
 namespace pt
@@ -25,18 +26,20 @@ std::unique_ptr<EmbeddingLayer> EmbeddingLayer::create(std::istream& stream)
     return std::unique_ptr<EmbeddingLayer>(new EmbeddingLayer(std::move(*weights)));
 }
 
-bool EmbeddingLayer::apply(const Config&, Tensor&& in, Tensor& out) const
+bool EmbeddingLayer::apply(LayerData& layerData) const
 {
-    const auto iw = in.getUnpaddedDims();
+    const Tensor& in = layerData.in;
+    const auto& iw = in.getDims();
 
     if(iw.size() != 1)
     {
         PT_LOG_ERROR << "Input tensor dims count must be 1" <<
-                            " (input dims: " << VectorPrinter<std::size_t>{iw} << ")" << std::endl;
+                            " (input dims: " << VectorPrinter<std::size_t>{ iw } << ")" << std::endl;
         return false;
     }
 
-    out.resizeWithPadding(iw[0], _weights.getUnpaddedDims()[1]);
+    Tensor& out = layerData.out;
+    out.resize(iw[0], _weights.getDims()[1]);
 
     auto outIt = out.begin();
     auto wBegin = _weights.begin();
@@ -45,15 +48,8 @@ bool EmbeddingLayer::apply(const Config&, Tensor&& in, Tensor& out) const
     for(auto inIt = in.begin(), inEnd = in.begin() + long(iw[0]); inIt != inEnd; ++inIt)
     {
         auto wIt = wBegin + int(*inIt * inc);
-        auto wPtr = &*wIt;
-        auto oPtr = &*outIt;
+        std::memcpy(&*outIt, &*wIt, inc * sizeof(Tensor::Type));
         outIt += long(inc);
-
-        for(int index = 0; index != int(inc); index += Tensor::VectorSize)
-        {
-            Tensor::Vector wv = simdpp::load(wPtr + index);
-            simdpp::store(oPtr + index, wv);
-        }
     }
 
     return true;
@@ -62,7 +58,6 @@ bool EmbeddingLayer::apply(const Config&, Tensor&& in, Tensor& out) const
 EmbeddingLayer::EmbeddingLayer(Tensor&& weights) noexcept :
     _weights(std::move(weights))
 {
-    _weights.addPadding();
 }
 
 }

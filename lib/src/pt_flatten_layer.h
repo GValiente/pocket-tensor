@@ -9,7 +9,7 @@
 #define PT_FLATTEN_LAYER_H
 
 #include "pt_layer.h"
-#include "pt_tensor.h"
+#include "pt_layer_data.h"
 
 namespace pt
 {
@@ -20,10 +20,10 @@ class FlattenLayer : public Layer
 public:
     FlattenLayer() = default;
 
-    bool apply(const Config&, Tensor&& in, Tensor& out) const final
+    bool apply(LayerData& layerData) const final
     {
-        out = std::move(in);
-        out.flatten();
+        layerData.out = std::move(layerData.in);
+        layerData.out.flatten();
         return true;
     }
 };

@@ -36,6 +36,8 @@ set(SOURCES
     src/lstm_simple_7x20_test.cpp
     src/lstm_simple_stacked_16x9_test.cpp
     src/lstm_stacked_64x83_test.cpp
+    # src/mnist_test.cpp
+    # src/imdb_test.cpp
 )
 
 # Define data folder:

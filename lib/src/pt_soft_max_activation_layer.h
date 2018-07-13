@@ -22,7 +22,7 @@ public:
 
     SoftMaxActivationLayer() = default;
 
-    void apply(const Config&, Tensor& out) const final
+    void apply(Tensor& out) const final
     {
         FloatType d = 0;
 
@@ -32,13 +32,26 @@ public:
             d += value;
         }
 
-        Tensor::Vector vd = makeVector(1 / d);
-
-        for(auto it = out.begin(), end = out.end(); it != end; it += Tensor::VectorSize)
+        if(out.getSize() % Tensor::VectorSize == 0)
         {
-            auto ptr = &*it;
-            Tensor::Vector v = simdpp::load(ptr);
-            simdpp::store(ptr, simdpp::mul(v, vd));
+            Tensor::Vector vd = makeVector(1 / d);
+
+            for(auto it = out.begin(), end = out.end(); it != end; it += Tensor::VectorSize)
+            {
+                auto ptr = &*it;
+                Tensor::Vector v = simdpp::load(ptr);
+                simdpp::store(ptr, simdpp::mul(v, vd));
+            }
+        }
+        else
+        {
+            Tensor::Type sd = 1 / d;
+
+            for(auto it = out.begin(), end = out.end(); it != end; ++it)
+            {
+                auto& x = *it;
+                x *= sd;
+            }
         }
     }
 };

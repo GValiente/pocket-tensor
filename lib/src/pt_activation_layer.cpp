@@ -7,8 +7,8 @@
 
 #include "pt_activation_layer.h"
 
-#include "pt_tensor.h"
 #include "pt_parser.h"
+#include "pt_layer_data.h"
 #include "pt_linear_activation_layer.h"
 #include "pt_relu_activation_layer.h"
 #include "pt_elu_activation_layer.h"
@@ -96,10 +96,10 @@ std::unique_ptr<ActivationLayer> ActivationLayer::create(std::istream& stream)
     return activationLayer;
 }
 
-bool ActivationLayer::apply(const Config& config, Tensor&& in, Tensor& out) const
+bool ActivationLayer::apply(LayerData& layerData) const
 {
-    out = std::move(in);
-    apply(config, out);
+    layerData.out = std::move(layerData.in);
+    apply(layerData.out);
     return true;
 }
 

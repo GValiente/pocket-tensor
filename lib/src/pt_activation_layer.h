@@ -13,15 +13,17 @@
 namespace pt
 {
 
+class Tensor;
+
 class ActivationLayer : public Layer
 {
 
 public:
     static std::unique_ptr<ActivationLayer> create(std::istream& stream);
 
-    virtual void apply(const Config& config, Tensor& out) const = 0;
+    virtual void apply(Tensor& out) const = 0;
 
-    bool apply(const Config& config, Tensor&& in, Tensor& out) const final;
+    bool apply(LayerData& layerData) const final;
 
 protected:
     ActivationLayer() = default;

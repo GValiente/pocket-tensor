@@ -86,10 +86,10 @@ struct Assertion
 // IMPLEMENTATION //
 
 #ifdef CATCH_CONFIG_MAIN
-#include <memory>
-#include <vector>
 #include <string>
+#include <memory>
 #include <iostream>
+#include <unordered_map>
 
 namespace CatchMini
 {
@@ -98,7 +98,7 @@ namespace
 {
     struct StaticData
     {
-        std::vector<std::pair<const char*, TestCase>> testCases;
+        std::unordered_map<const char*, TestCase> testCases;
         std::unique_ptr<TestCase> firstDuplicatedTestCase = nullptr;
         std::unique_ptr<TestCase> secondDuplicatedTestCase = nullptr;
     };
@@ -209,11 +209,15 @@ namespace
                 padStrings(numTestCasesStr, numAssertionsStr);
 
                 auto numPassedTestCasesStr = std::to_string(testCases.size() - numFailedTestCases);
-                auto numPassedAssertionsStr = std::to_string(numAssertions - numFailedTestCases);
+                auto numPassedAssertionsStr = std::to_string(numAssertions ? numAssertions - numFailedTestCases : 0);
                 padStrings(numPassedTestCasesStr, numPassedAssertionsStr);
 
-                std::cout << "test cases: " << numTestCasesStr << " | " << numPassedTestCasesStr << " passed | " << numFailedTestCases << " failed" << std::endl;
-                std::cout << "assertions: " << numAssertionsStr << " | " << numPassedAssertionsStr << " passed | " << numFailedTestCases << " failed" << std::endl;
+                auto numFailedTestCasesStr = std::to_string(numFailedTestCases);
+                auto numFailedAssertionsStr = std::to_string(numAssertions ? numFailedTestCases : 0);
+                padStrings(numPassedTestCasesStr, numPassedAssertionsStr);
+
+                std::cout << "test cases: " << numTestCasesStr << " | " << numPassedTestCasesStr << " passed | " << numFailedTestCasesStr << " failed" << std::endl;
+                std::cout << "assertions: " << numAssertionsStr << " | " << numPassedAssertionsStr << " passed | " << numFailedAssertionsStr << " failed" << std::endl;
                 exitCode = 1;
             }
             else
@@ -239,18 +243,16 @@ bool TestCase::create(void(*function)(), const char* name, const char* file, int
 
     TestCase testCase{ function, name, file, line };
     auto& testCases = staticData->testCases;
+    auto testCasesIt = testCases.find(name);
 
-    for(const auto& testCasePair : testCases)
+    if(testCasesIt != testCases.end())
     {
-        if(testCasePair.first == name)
-        {
-            staticData->firstDuplicatedTestCase.reset(new TestCase(testCasePair.second));
-            staticData->secondDuplicatedTestCase.reset(new TestCase(testCase));
-            return false;
-        }
+        staticData->firstDuplicatedTestCase.reset(new TestCase(testCasesIt->second));
+        staticData->secondDuplicatedTestCase.reset(new TestCase(testCase));
+        return false;
     }
 
-    testCases.push_back(std::make_pair(name, testCase));
+    testCases[name] = testCase;
     return true;
 }
 

@@ -7,6 +7,9 @@
 
 #include "pt_locally_connected_1d_layer.h"
 
+#include <array>
+#include "pt_dispatcher.h"
+#include "pt_layer_data.h"
 #include "pt_multiply_add.h"
 #include "pt_logger.h"
 
@@ -16,34 +19,84 @@ namespace pt
 namespace
 {
     template<class MultiplyAddType>
-    void multiplyAddImpl(const Tensor& weights, const Tensor& biases, const Tensor& in,
-                         Tensor& out) noexcept
+    void multiplyAddImpl(const Tensor& weights, const Tensor& biases, LayerData& layerData)
     {
-        const auto& ww = weights.getDims();
-        const auto& iw = in.getDims();
-        auto is0 = int(iw[1]);
-        auto ts0 = int(ww[1]);
-        auto ws0 = int(ww[2] * ww[1]);
-        auto ws1 = int(ww[2]);
-
-        auto inIt = in.begin();
-        auto outIt = out.begin();
-        auto bIt = biases.begin();
-        MultiplyAddType multiplyAdd;
-
-        for(auto wIt = weights.begin(), wEndIt = weights.end(); wIt != wEndIt;
-                wIt += ws0, bIt += ts0, outIt += ts0, inIt += is0)
+        struct Task
         {
-            auto outIt2 = outIt;
-            auto bIt2 = bIt;
+            const Tensor* weights;
+            const Tensor* biases;
+            LayerData* layerData;
+            int threads;
+            int taskId;
 
-            for(auto w0 = wIt; w0 != wIt + ws0; w0 += ws1)
+            void operator()() noexcept
             {
-                *outIt2 = *bIt2 + multiplyAdd(&*inIt, &*w0, ws1);
-                ++outIt2;
-                ++bIt2;
+                const Tensor& in = layerData->in;
+                Tensor& out = layerData->out;
+
+                const auto& ww = weights->getDims();
+                const auto& iw = in.getDims();
+                auto inInc = int(iw[1]);
+                auto bOutInc = int(ww[1]);
+                auto wInc = int(ww[2] * ww[1]);
+                auto wInc2 = int(ww[2]);
+
+                auto inIt = in.begin();
+                auto outIt = out.begin();
+                auto bIt = biases->begin();
+                MultiplyAddType multiplyAdd;
+
+                auto weightsBegin = weights->begin();
+                int its = int(weights->end() - weightsBegin) / wInc;
+                int taskIts = its / threads;
+                int taskBegin = taskIts * taskId;
+                int taskEnd;
+
+                if(taskId == threads - 1)
+                {
+                    taskEnd = its;
+                }
+                else
+                {
+                    taskEnd = taskBegin + taskIts;
+                }
+
+                inIt += taskIts * taskId * inInc;
+                outIt += taskIts * taskId * bOutInc;
+                bIt += taskIts * taskId * bOutInc;
+
+                for(auto wIt = weightsBegin + (taskBegin * wInc), wEnd = weightsBegin + (taskEnd * wInc);
+                    wIt != wEnd; wIt += wInc)
+                {
+                    auto outIt2 = outIt;
+                    auto bIt2 = bIt;
+
+                    for(auto wIt2 = wIt; wIt2 != wIt + wInc; wIt2 += wInc2)
+                    {
+                        *outIt2 = *bIt2 + multiplyAdd(&*inIt, &*wIt2, wInc2);
+                        ++outIt2;
+                        ++bIt2;
+                    }
+
+                    inIt += inInc;
+                    outIt += bOutInc;
+                    bIt += bOutInc;
+                }
             }
+        };
+
+        std::array<Task, PT_MAX_CPU_THREADS> tasks;
+        Dispatcher& dispatcher = layerData.dispatcher;
+        int threads = int(dispatcher.threads());
+
+        for(int taskId = 0; taskId != threads; ++taskId)
+        {
+            Task& task = tasks[std::size_t(taskId)];
+            task = Task{ &weights, &biases, &layerData, threads, taskId };
+            dispatcher.add([&task]{ task(); });
         }
+
+        dispatcher.join();
     }
 }
 
@@ -78,15 +131,10 @@ std::unique_ptr<LocallyConnected1DLayer> LocallyConnected1DLayer::create(std::is
                                             std::move(activation)));
 }
 
-bool LocallyConnected1DLayer::apply(const Config& config, Tensor&& in, Tensor& out) const
+bool LocallyConnected1DLayer::apply(LayerData& layerData) const
 {
-    in.removePadding();
-
-    if(out.isValid())
-    {
-        out.removePadding(false);
-    }
-
+    Tensor& in = layerData.in;
+    Tensor& out = layerData.out;
     const auto& iw = in.getDims();
 
     if(iw.size() != 2)
@@ -108,24 +156,25 @@ bool LocallyConnected1DLayer::apply(const Config& config, Tensor&& in, Tensor& o
         return false;
     }
 
-    auto ws1 = ww[2];
     out.resize(ww[0], ww[1]);
 
-    if(PT_LOOP_UNROLLING_ENABLE && ws1 % (Tensor::VectorSize * 2) == 0)
+    int threads = int(layerData.dispatcher.threads());
+    int threadSize = int(ww[2]) / threads;
+
+    if(PT_LOOP_UNROLLING_ENABLE && threadSize && threadSize % (Tensor::VectorSize * 2) == 0)
     {
-        multiplyAddImpl<Vector2MultiplyAdd>(_weights, _biases, in, out);
+        multiplyAddImpl<Vector2MultiplyAdd>(_weights, _biases, layerData);
     }
-    else if(ws1 % Tensor::VectorSize == 0)
+    else if(threadSize && threadSize % Tensor::VectorSize == 0)
     {
-        multiplyAddImpl<VectorMultiplyAdd>(_weights, _biases, in, out);
+        multiplyAddImpl<VectorMultiplyAdd>(_weights, _biases, layerData);
     }
     else
     {
-        multiplyAddImpl<ScalarMultiplyAdd>(_weights, _biases, in, out);
+        multiplyAddImpl<ScalarMultiplyAdd>(_weights, _biases, layerData);
     }
 
-    out.addPadding();
-    _activation->apply(config, out);
+    _activation->apply(out);
     return true;
 }
 
@@ -135,8 +184,6 @@ LocallyConnected1DLayer::LocallyConnected1DLayer(Tensor&& weights, Tensor&& bias
     _biases(std::move(biases)),
     _activation(std::move(activation))
 {
-    _weights.removePadding();
-    _biases.removePadding();
 }
 
 }

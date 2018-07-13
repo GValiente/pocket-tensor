@@ -20,7 +20,7 @@ class Conv1DLayer : public Layer
 public:
     static std::unique_ptr<Conv1DLayer> create(std::istream& stream);
 
-    bool apply(const Config& config, Tensor&& in, Tensor& out) const final;
+    bool apply(LayerData& layerData) const final;
 
 protected:
     Tensor _weights;

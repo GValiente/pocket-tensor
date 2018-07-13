@@ -10,47 +10,11 @@
 #include <string>
 #include <fstream>
 #include "pt_parser.h"
-#include "pt_tensor.h"
+#include "pt_dispatcher.h"
+#include "pt_layer_data.h"
 
 namespace pt
 {
-
-namespace
-{
-    template<class LayerType, class TensorType>
-    bool predictImpl(const Config& config, const std::vector<std::unique_ptr<LayerType>>& layers,
-                     TensorType in, TensorType& out)
-    {
-        if(! in.isValid())
-        {
-            PT_LOG_ERROR << "Input tensor is not valid" << std::endl;
-            return false;
-        }
-
-        std::size_t layersCount = layers.size();
-        in.addPadding();
-
-        for(std::size_t i = 0; i != layersCount - 1; ++i)
-        {
-            if(! layers[i]->apply(config, std::move(in), out))
-            {
-                PT_LOG_ERROR << "Layer apply failed" << std::endl;
-                return false;
-            }
-
-            in = std::move(out);
-        }
-
-        if(! layers[layersCount - 1]->apply(config, std::move(in), out))
-        {
-            PT_LOG_ERROR << "Layer apply failed" << std::endl;
-            return false;
-        }
-
-        out.removePadding();
-        return true;
-    }
-}
 
 std::unique_ptr<Model> Model::create(const std::string& filePath)
 {
@@ -109,7 +73,40 @@ std::unique_ptr<Model> Model::create(std::istream& stream)
 
 bool Model::predict(Tensor in, Tensor& out) const
 {
-    return predictImpl(_config, _layers, std::move(in), out);
+    Dispatcher dispatcher;
+
+    return predict(dispatcher, std::move(in), out);
+}
+
+bool Model::predict(Dispatcher& dispatcher, Tensor in, Tensor& out) const
+{
+    if(! in.isValid())
+    {
+        PT_LOG_ERROR << "Input tensor is not valid" << std::endl;
+        return false;
+    }
+
+    LayerData layerData{ std::move(in), out, dispatcher, _config };
+    std::size_t layersCount = _layers.size();
+
+    for(std::size_t i = 0; i != layersCount - 1; ++i)
+    {
+        if(! _layers[i]->apply(layerData))
+        {
+            PT_LOG_ERROR << "Layer apply failed" << std::endl;
+            return false;
+        }
+
+        layerData.in = std::move(out);
+    }
+
+    if(! _layers[layersCount - 1]->apply(layerData))
+    {
+        PT_LOG_ERROR << "Layer apply failed" << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 Model::Model(std::vector<std::unique_ptr<Layer>>&& layers) noexcept :

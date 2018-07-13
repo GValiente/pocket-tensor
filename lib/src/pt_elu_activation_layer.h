@@ -22,7 +22,7 @@ public:
 
     EluActivationLayer() = default;
 
-    void apply(const Config&, Tensor& out) const final
+    void apply(Tensor& out) const final
     {
         for(FloatType& value : out)
         {

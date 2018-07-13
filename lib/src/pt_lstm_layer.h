@@ -20,7 +20,7 @@ class LstmLayer : public Layer
 public:
     static std::unique_ptr<LstmLayer> create(std::istream& stream);
 
-    bool apply(const Config& config, Tensor&& in, Tensor& out) const final;
+    bool apply(LayerData& layerData) const final;
 
 protected:
     struct TempData;
@@ -46,7 +46,7 @@ protected:
 	      std::unique_ptr<ActivationLayer>&& innerActivation,
 	      std::unique_ptr<ActivationLayer>&& activation, bool returnSequences) noexcept;
 
-    void _step(const Config& config, TempData& tempData, Tensor& out) const;
+    void _step(TempData& tempData, Tensor& out) const;
 };
 
 }

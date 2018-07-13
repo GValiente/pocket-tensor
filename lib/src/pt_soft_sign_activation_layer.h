@@ -22,18 +22,27 @@ public:
 
     SoftSignActivationLayer() = default;
 
-    void apply(const Config&, Tensor& out) const final
+    void apply(Tensor& out) const final
     {
-        // return x / (1.f + std::abs(x));
-
-        Tensor::Vector one = makeVector(FloatType(1));
-
-        for(auto it = out.begin(), end = out.end(); it != end; it += Tensor::VectorSize)
+        if(out.getSize() % Tensor::VectorSize == 0)
         {
-            auto ptr = &*it;
-            Tensor::Vector v = simdpp::load(ptr);
-            Tensor::Vector d = simdpp::add(one, simdpp::abs(v));
-            simdpp::store(ptr, simdpp::div(v, d));
+            Tensor::Vector one = makeVector(FloatType(1));
+
+            for(auto it = out.begin(), end = out.end(); it != end; it += Tensor::VectorSize)
+            {
+                auto ptr = &*it;
+                Tensor::Vector v = simdpp::load(ptr);
+                Tensor::Vector d = simdpp::add(one, simdpp::abs(v));
+                simdpp::store(ptr, simdpp::div(v, d));
+            }
+        }
+        else
+        {
+            for(auto it = out.begin(), end = out.end(); it != end; ++it)
+            {
+                auto& x = *it;
+                x = x / (Tensor::Type(1) + std::abs(x));
+            }
         }
     }
 };
