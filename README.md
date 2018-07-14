@@ -123,7 +123,7 @@ The most common layer types used in image recognition and sequences prediction a
 
 ## Performance
 
-The prediction time of the following models have been measured on a Raspberry Pi 3:
+The prediction time of the following models has been measured on a Raspberry Pi 3:
 
 ### CNN
 
@@ -141,7 +141,7 @@ model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='sigmoid'))
 ```
 
-| Library       | Elapsed time (us) |
+| Library       | Elapsed time (μs) |
 | ------------- | ----------------: |
 | Keras         |             23363 |
 | Kerasify      |             64238 |
@@ -158,7 +158,7 @@ model.add(LSTM(128, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(1, activation='sigmoid'))
 ```
 
-| Library       | Elapsed time (us) |
+| Library       | Elapsed time (μs) |
 | ------------- | ----------------: |
 | Keras         |             89344 |
 | Kerasify      |             79060 |
