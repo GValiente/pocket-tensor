@@ -125,7 +125,7 @@ The most common layer types used in image recognition and sequences prediction a
 
 The prediction time of the following models have been measured on a Raspberry Pi 3:
 
-CNN:
+### CNN
 
 ```python
 model = Sequential()
@@ -148,7 +148,7 @@ model.add(Dense(num_classes, activation='sigmoid'))
 | frugally-deep |             29298 |
 | pocket-tensor |             27329 |
 
-LSTM:
+### LSTM
 
 ```python
 model = Sequential()
