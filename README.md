@@ -1,6 +1,6 @@
 # pocket-tensor
 
-pocket-tensor is a [Kerasify](https://github.com/moof2k/kerasify) fork designed for running trained Keras models from a C++ application on embedded devices.
+pocket-tensor is an [arquolo's](https://github.com/arquolo) [Kerasify](https://github.com/moof2k/kerasify) fork designed for running trained Keras models from a C++ application on embedded devices.
 
 ## Design goals
 
@@ -141,12 +141,12 @@ model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='sigmoid'))
 ```
 
-| Library       | Elapsed time (μs) |
-| ------------- | ----------------: |
-| Keras         |             23363 |
-| Kerasify      |             64238 |
-| frugally-deep |             29298 |
-| pocket-tensor |             27329 |
+| Library            | Elapsed time (μs) |
+| ------------------ | ----------------: |
+| Keras              |             23363 |
+| arquolo's Kerasify |             64238 |
+| frugally-deep      |             29298 |
+| pocket-tensor      |             27329 |
 
 ### LSTM
 
@@ -158,9 +158,9 @@ model.add(LSTM(128, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(1, activation='sigmoid'))
 ```
 
-| Library       | Elapsed time (μs) |
-| ------------- | ----------------: |
-| Keras         |             89344 |
-| Kerasify      |             79060 |
-| frugally-deep |     Not supported |
-| pocket-tensor |             67115 |
+| Library            | Elapsed time (μs) |
+| ------------------ | ----------------: |
+| Keras              |             89344 |
+| arquolo's Kerasify |             79060 |
+| frugally-deep      |     Not supported |
+| pocket-tensor      |             67115 |
