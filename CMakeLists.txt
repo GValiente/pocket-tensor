@@ -1,8 +1,19 @@
 cmake_minimum_required(VERSION 3.4)
 project(pocket-tensor-project)
 
-# Enable C++11:
-set(CMAKE_CXX_STANDARD 11)
+# Define build options:
+option(PT_BUILD_ALL "Build all pocket-tensor artefacts" OFF)
+option(PT_BUILD_TESTS "Build pocket-tensor tests" OFF)
+option(PT_BUILD_BENCHMARK "Build pocket-tensor benchmark" OFF)
+
+# Define C++ version:
+if(PT_BUILD_BENCHMARK OR PT_BUILD_ALL)
+    # Enable C++14:
+    set(CMAKE_CXX_STANDARD 14)
+else()
+    # Enable C++11:
+    set(CMAKE_CXX_STANDARD 11)
+endif()
 
 # Detect Clang:
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -46,11 +57,12 @@ set(PT_LIBSIMDPP_PATH "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/libsimdpp" CACHE ST
 # Add library subdirectory:
 add_subdirectory(lib)
 
-# Define build all artefacts option:
-option(PT_BUILD_ALL "Build all pocket-tensor artefacts" OFF)
-
 # Add tests subdirectory:
-option(PT_BUILD_TESTS "Build pocket-tensor tests" OFF)
 if(PT_BUILD_TESTS OR PT_BUILD_ALL)
     add_subdirectory(tests)
+endif()
+
+# Add benchmark subdirectory:
+if(PT_BUILD_BENCHMARK OR PT_BUILD_ALL)
+    add_subdirectory(benchmark)
 endif()

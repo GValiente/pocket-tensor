@@ -47,7 +47,7 @@ To build and run the unit tests, you need to generate them first:
 python make_tests.py
 mkdir tests_build
 cd tests_build
-cmake -DPT_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release ../..
+cmake -DPT_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release ..
 make
 ./tests/pocket-tensor-tests
 ```
@@ -123,44 +123,55 @@ The most common layer types used in image recognition and sequences prediction a
 
 ## Performance
 
-The prediction time of the following models has been measured on a Raspberry Pi 3:
+A benchmark application is included with this library. To build and run it:
 
-### CNN
+```
+mkdir benchmark_build
+cd benchmark_build
+cmake -DPT_BUILD_BENCHMARK=ON -DCMAKE_BUILD_TYPE=Release ..
+make
+./benchmark/pocket-tensor-benchmark
+```
+
+The prediction time of the following models has been measured on a PC with a Intel Core i7-6500U CPU @ 2.50GHz and on a Raspberry Pi 3:
+
+### Mnist
 
 ```python
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
                  activation='relu',
-                 input_shape=input_shape))
+                 input_shape=(28, 28, 1)))
 model.add(Conv2D(64, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.25))
 model.add(Flatten())
 model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation='sigmoid'))
+model.add(Dense(10, activation='sigmoid'))
 ```
 
-| Library            | Elapsed time (μs) |
-| ------------------ | ----------------: |
-| Keras              |             23363 |
-| arquolo's Kerasify |             64238 |
-| frugally-deep      |             29298 |
-| pocket-tensor      |             27329 |
+| Library            | PC elapsed time (μs) | RPi3 elapsed time (μs) |
+| ------------------ | -------------------: | ---------------------: |
+| Keras              |                 1470 |                  23363 |
+| arquolo's Kerasify |                 3502 |                  64238 |
+| frugally-deep      |                 1402 |                  29298 |
+| pocket-tensor      |                 1049 |                  27329 |
 
-### LSTM
+### Imdb
 
 ```python
 model = Sequential()
-model.add(Embedding(max_features, 128))
+model.add(Embedding(20000, 128))
 model.add(LSTM(128, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(128, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(1, activation='sigmoid'))
 ```
 
-| Library            | Elapsed time (μs) |
-| ------------------ | ----------------: |
-| Keras              |             89344 |
-| arquolo's Kerasify |             79060 |
-| frugally-deep      |     Not supported |
-| pocket-tensor      |             67115 |
+| Library            | PC elapsed time (μs) | RPi3 elapsed time (μs) |
+| ------------------ | -------------------: | ---------------------: |
+| Keras              |                10160 |                  89344 |
+| arquolo's Kerasify |                 5378 |                  79060 |
+| frugally-deep      |        Not supported |          Not supported |
+| pocket-tensor      |                 3314 |                  67115 |
+
