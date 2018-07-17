@@ -13,6 +13,7 @@ pocket-tensor is an [arquolo's](https://github.com/arquolo) [Kerasify](https://g
 ## Improvements over Kerasify
 
 * Thanks to the awesome [libsimdpp library](https://github.com/p12tic/libsimdpp), tensor operations have been rewritten using SIMD instructions to improve prediction performance.
+* Predictions run across multiple CPU cores.
 * Memory (re)usage has been improved in order to reduce memory allocations.
 * Apart from `float`, `double` precision tensors are supported (see `pt_tweakme.h` file).
 * Tensor dimensions are rigorously validated on each layer to avoid bad models usage.
@@ -36,6 +37,7 @@ pocket-tensor has been tested with these compilers:
 * GCC 4.9.
 * MSVC 2017.
 * Whatever Clang comes with Apple LLVM 9.1.0.
+* Whatever Clang comes with Android Studio 3.1.3 (see Android section).
 
 ## How to build
 
@@ -174,4 +176,48 @@ model.add(Dense(1, activation='sigmoid'))
 | arquolo's Kerasify |                 5378 |                  79060 |
 | frugally-deep      |        Not supported |          Not supported |
 | pocket-tensor      |                 3314 |                  67115 |
+
+## Android
+
+pocket-tensor supports Android apps (armeabi-v7a ABI only).
+
+To add pocket-tensor to an Android project with C++ support, you must:
+
+1) Enable ARM NEON instructions on the build.gradle project file (https://developer.android.com/ndk/guides/cmake):
+
+```
+android {
+    ...
+    defaultConfig {
+        ...
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_ARM_NEON=TRUE"
+            }
+        }
+    }
+}
+```
+
+2) Disable all ABIs except armeabi-v7a on the build.gradle project file (https://developer.android.com/studio/build/configure-apk-splits):
+
+```
+android {
+    ...
+    splits {
+        abi {
+            enable true
+            reset()
+            include "armeabi-v7a"
+        }
+    }
+}
+```
+
+3) Include pocket-tensor on the CMakeLists.txt file of your native library:
+
+```
+add_subdirectory(/path/to/pocket-tensor pocket-tensor)
+target_link_libraries(native-lib pocket-tensor)
+```
 

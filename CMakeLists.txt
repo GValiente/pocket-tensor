@@ -42,10 +42,14 @@ endif()
 
 # Add native CPU features support:
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANGXX)
-    add_definitions("-march=native")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Android")
+        # See documentation
+    else()
+        add_definitions("-march=native")
 
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
-        add_definitions("-mfpu=neon")
+        if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+            add_definitions("-mfpu=neon")
+        endif()
     endif()
 elseif(MSVC)
     add_definitions("/arch:AVX")
