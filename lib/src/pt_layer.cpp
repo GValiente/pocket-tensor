@@ -19,6 +19,7 @@
 #include "pt_lstm_layer.h"
 #include "pt_embedding_layer.h"
 #include "pt_batch_normalization_layer.h"
+#include "pt_leaky_relu_layer.h"
 
 namespace pt
 {
@@ -38,6 +39,7 @@ namespace
         Lstm = 10,
         Embedding = 11,
         BatchNormalization = 12,
+        LeakyRelu = 13
     };
 }
 
@@ -98,6 +100,10 @@ std::unique_ptr<Layer> Layer::create(std::istream& stream)
 
     case BatchNormalization:
         layer = BatchNormalizationLayer::create(stream);
+        break;
+
+    case LeakyRelu:
+        layer = LeakyReluLayer::create(stream);
         break;
 
     default:

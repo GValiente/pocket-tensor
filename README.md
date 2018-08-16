@@ -120,7 +120,7 @@ The most common layer types used in image recognition and sequences prediction a
 
 * Convolutions: `Conv1D`, `Conv2D`, `LocallyConnected1D`.
 * Sequences related: `LSTM`, `Embedding`.
-* Activations: `Linear`, `ReLU`, `ELU`, `Softplus`, `Softsign`, `Tanh`, `Sigmoid`, `HardSigmoid`, `Softmax`.
+* Activations: `Linear`, `ReLU`, `ELU`, `SeLU`, `LeakyReLU`, `Softplus`, `Softsign`, `Tanh`, `Sigmoid`, `HardSigmoid`, `Softmax`.
 * Other: `Dense`, `Flatten`, `MaxPooling2D`, `BatchNormalization`, `ELU`.
 
 ## Performance

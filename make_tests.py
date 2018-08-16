@@ -13,7 +13,7 @@ from keras.layers import (
     MaxPooling2D, Dropout, BatchNormalization
 )
 from keras.layers.recurrent import LSTM
-from keras.layers.advanced_activations import ELU
+from keras.layers.advanced_activations import ELU, LeakyReLU
 from keras.layers.embeddings import Embedding
 from tensorflow import ConfigProto, Session
 
@@ -270,6 +270,17 @@ model = Sequential([
 output_testcase(model, test_x, test_y, 'relu_10', '1e-6')
 
 
+''' Activation LeakyReLU '''
+test_x = np.random.rand(1, 10).astype('f')
+test_y = np.random.rand(1, 1).astype('f')
+model = Sequential([
+    Dense(10, input_dim=10),
+    LeakyReLU(alpha=0.5),
+    Dense(1)
+])
+output_testcase(model, test_x, test_y, 'leaky_relu_10', '1e-6')
+
+
 ''' Dense relu '''
 test_x = np.random.rand(1, 10).astype('f')
 test_y = np.random.rand(1, 10).astype('f')
@@ -323,6 +334,17 @@ model = Sequential([
     Dense(10, input_dim=10, activation='tanh')
 ])
 output_testcase(model, test_x, test_y, 'dense_tanh_10', '1e-6')
+
+
+''' Dense selu '''
+test_x = np.random.rand(1, 10).astype('f')
+test_y = np.random.rand(1, 10).astype('f')
+model = Sequential([
+    Dense(10, input_dim=10, activation='selu'),
+    Dense(10, input_dim=10, activation='selu'),
+    Dense(10, input_dim=10, activation='selu')
+])
+output_testcase(model, test_x, test_y, 'dense_selu_10', '1e-6')
 
 
 ''' Conv softplus '''

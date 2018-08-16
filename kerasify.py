@@ -12,6 +12,7 @@ LAYER_MAXPOOLING_2D = 9
 LAYER_LSTM = 10
 LAYER_EMBEDDING = 11
 LAYER_BATCH_NORMALIZATION = 12
+LAYER_LEAKY_RELU = 13
 
 ACTIVATION_LINEAR = 1
 ACTIVATION_RELU = 2
@@ -22,6 +23,7 @@ ACTIVATION_SIGMOID = 6
 ACTIVATION_TANH = 7
 ACTIVATION_HARD_SIGMOID = 8
 ACTIVATION_SOFTMAX = 9
+ACTIVATION_SELU = 10
 
 
 def write_tensor(f, data, dims=1):
@@ -64,6 +66,8 @@ def export_activation(f, activation):
         f.write(struct.pack('I', ACTIVATION_HARD_SIGMOID))
     elif activation == 'softmax':
         f.write(struct.pack('I', ACTIVATION_SOFTMAX))
+    elif activation == 'selu':
+        f.write(struct.pack('I', ACTIVATION_SELU))
     else:
         assert False, "Unsupported activation type: %s" % activation
 
@@ -254,6 +258,10 @@ def export_model(model, filename):
 
             elif layer_type == 'BatchNormalization':
                 export_layer_normalization(f, layer)
+
+            elif layer_type == 'LeakyReLU':
+                f.write(struct.pack('I', LAYER_LEAKY_RELU))
+                f.write(struct.pack('f', layer.alpha))
 
             else:
                 assert False, "Unsupported layer type: %s" % layer_type

@@ -18,6 +18,7 @@
 #include "pt_tanh_activation_layer.h"
 #include "pt_hard_sigmoid_activation_layer.h"
 #include "pt_soft_max_activation_layer.h"
+#include "pt_selu_activation_layer.h"
 
 namespace pt
 {
@@ -34,7 +35,8 @@ namespace
         Sigmoid = 6,
         Tanh = 7,
         HardSigmoid = 8,
-        SoftMax = 9
+        SoftMax = 9,
+        Selu = 10
     };
 }
 
@@ -87,6 +89,10 @@ std::unique_ptr<ActivationLayer> ActivationLayer::create(std::istream& stream)
 
     case SoftMax:
         activationLayer.reset(new SoftMaxActivationLayer());
+        break;
+
+    case Selu:
+        activationLayer.reset(new SeluActivationLayer());
         break;
 
     default:

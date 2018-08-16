@@ -16,6 +16,7 @@ set(SOURCES
     src/pt_lstm_layer.cpp
     src/pt_embedding_layer.cpp
     src/pt_batch_normalization_layer.cpp
+    src/pt_leaky_relu_layer.cpp
     src/pt_model.cpp
 )
 

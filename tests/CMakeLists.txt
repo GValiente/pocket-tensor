@@ -26,7 +26,9 @@ set(SOURCES
     src/dense_softmax_10_test.cpp
     src/dense_softsign_10_test.cpp
     src/dense_tanh_10_test.cpp
+    src/dense_selu_10_test.cpp
     src/elu_10_test.cpp
+    src/leaky_relu_10_test.cpp
     src/maxpool2d_1x1_test.cpp
     src/maxpool2d_2x2_test.cpp
     src/maxpool2d_3x2x2_test.cpp
