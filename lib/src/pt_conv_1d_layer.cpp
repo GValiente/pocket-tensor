@@ -79,9 +79,9 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks;
+        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
         Dispatcher& dispatcher = layerData.dispatcher;
-        int threads = int(dispatcher.threads());
+        auto threads = int(dispatcher.threads());
 
         for(int taskId = 0; taskId != threads; ++taskId)
         {
@@ -150,8 +150,8 @@ bool Conv1DLayer::apply(LayerData& layerData) const
     Tensor& out = layerData.out;
     out.resize(iw[0] - offset, ww[0]);
 
-    int threads = int(layerData.dispatcher.threads());
-    int threadSize = int(ww[2] * ww[1]) / threads;
+    auto threads = int(layerData.dispatcher.threads());
+    auto threadSize = int(ww[2] * ww[1]) / threads;
 
     if(PT_LOOP_UNROLLING_ENABLE && threadSize && threadSize % (Tensor::VectorSize * 2) == 0)
     {

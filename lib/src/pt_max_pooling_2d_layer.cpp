@@ -85,9 +85,9 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks;
+        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
         Dispatcher& dispatcher = layerData.dispatcher;
-        int threads = int(dispatcher.threads());
+        auto threads = int(dispatcher.threads());
 
         for(int taskId = 0; taskId != threads; ++taskId)
         {
@@ -138,8 +138,8 @@ bool MaxPooling2DLayer::apply(LayerData& layerData) const
     out.fill(-std::numeric_limits<Tensor::Type>::infinity());
 
     Dispatcher& dispatcher = layerData.dispatcher;
-    int threads = int(dispatcher.threads());
-    int threadSize = int(iw[2]) / threads;
+    auto threads = int(dispatcher.threads());
+    auto threadSize = int(iw[2]) / threads;
 
     if(PT_LOOP_UNROLLING_ENABLE && threadSize && threadSize % (Tensor::VectorSize * 2) == 0)
     {

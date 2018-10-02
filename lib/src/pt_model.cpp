@@ -97,7 +97,7 @@ bool Model::predict(Dispatcher& dispatcher, Tensor in, Tensor& out) const
             return false;
         }
 
-        layerData.in = std::move(out);
+        layerData.in = std::move(layerData.out);
     }
 
     if(! _layers[layersCount - 1]->apply(layerData))

@@ -65,9 +65,9 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks;
+        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
         Dispatcher& dispatcher = layerData.dispatcher;
-        int threads = int(dispatcher.threads());
+        auto threads = int(dispatcher.threads());
 
         for(int taskId = 0; taskId != threads; ++taskId)
         {
@@ -135,8 +135,8 @@ bool DenseLayer::apply(LayerData& layerData) const
     Tensor& out = layerData.out;
     _biases.copyTo(out);
 
-    int threads = int(layerData.dispatcher.threads());
-    int threadSize = int(ww[1]) / threads;
+    auto threads = int(layerData.dispatcher.threads());
+    auto threadSize = int(ww[1]) / threads;
 
     if(PT_LOOP_UNROLLING_ENABLE && threadSize && threadSize % (Tensor::VectorSize * 2) == 0)
     {

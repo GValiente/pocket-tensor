@@ -32,9 +32,9 @@ namespace
 
             void operator()() noexcept
             {
-                int its = int(in->getSize());
-                int taskIts = its / threads;
-                int taskBegin = taskIts * taskId;
+                auto its = int(in->getSize());
+                auto taskIts = its / threads;
+                auto taskBegin = taskIts * taskId;
                 int taskEnd;
 
                 if(taskId == threads - 1)
@@ -52,8 +52,8 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks;
-        int threads = int(dispatcher.threads());
+        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
+        auto threads = int(dispatcher.threads());
 
         for(int taskId = 0; taskId != threads; ++taskId)
         {
@@ -77,9 +77,9 @@ namespace
 
             void operator()() noexcept
             {
-                int its = int(in->getSize());
-                int taskIts = its / threads;
-                int taskBegin = taskIts * taskId;
+                auto its = int(in->getSize());
+                auto taskIts = its / threads;
+                auto taskBegin = taskIts * taskId;
                 int taskEnd;
 
                 if(taskId == threads - 1)
@@ -97,8 +97,8 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks;
-        int threads = int(dispatcher.threads());
+        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
+        auto threads = int(dispatcher.threads());
 
         for(int taskId = 0; taskId != threads; ++taskId)
         {
@@ -161,8 +161,8 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks;
-        int threads = int(dispatcher.threads());
+        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
+        auto threads = int(dispatcher.threads());
 
         for(int taskId = 0; taskId != threads; ++taskId)
         {
@@ -187,9 +187,9 @@ namespace
 
             void operator()() noexcept
             {
-                int its = int(in->getSize());
-                int taskIts = its / threads;
-                int taskBegin = taskIts * taskId;
+                auto its = int(in->getSize());
+                auto taskIts = its / threads;
+                auto taskBegin = taskIts * taskId;
                 int taskEnd;
 
                 if(taskId == threads - 1)
@@ -208,8 +208,8 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks;
-        int threads = int(dispatcher.threads());
+        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
+        auto threads = int(dispatcher.threads());
 
         for(int taskId = 0; taskId != threads; ++taskId)
         {
@@ -387,8 +387,8 @@ void Tensor::add(const Tensor& other, Tensor& out, Dispatcher& dispatcher) const
 {
     PT_ASSERT(_dims == other._dims);
 
-    int threads = int(dispatcher.threads());
-    int threadSize = int(getSize()) / threads;
+    auto threads = int(dispatcher.threads());
+    auto threadSize = int(getSize()) / threads;
     copyTo(out);
 
     if(PT_LOOP_UNROLLING_ENABLE && threadSize && threadSize % (Tensor::VectorSize * 2) == 0)
@@ -410,8 +410,8 @@ void Tensor::multiply(const Tensor& other, Tensor& out, Dispatcher& dispatcher) 
     PT_ASSERT(isValid());
     PT_ASSERT(_dims == other._dims);
 
-    int threads = int(dispatcher.threads());
-    int threadSize = int(getSize()) / threads;
+    auto threads = int(dispatcher.threads());
+    auto threadSize = int(getSize()) / threads;
     copyTo(out);
 
     if(PT_LOOP_UNROLLING_ENABLE && threadSize && threadSize % (Tensor::VectorSize * 2) == 0)
@@ -436,8 +436,8 @@ void Tensor::dot(const Tensor& other, Tensor& out, Dispatcher& dispatcher) const
 
     out.resize(_dims[0], other._dims[0]);
 
-    int threads = int(dispatcher.threads());
-    int threadSize = int(_dims[1]) / threads;
+    auto threads = int(dispatcher.threads());
+    auto threadSize = int(_dims[1]) / threads;
 
     if(PT_LOOP_UNROLLING_ENABLE && threadSize && threadSize % (Tensor::VectorSize * 2) == 0)
     {
@@ -458,8 +458,8 @@ void Tensor::fma(const Tensor& scale, const Tensor& bias, Tensor& out, Dispatche
     PT_ASSERT(_dims == scale._dims);
     PT_ASSERT(_dims == bias._dims);
 
-    int threads = int(dispatcher.threads());
-    int threadSize = int(getSize()) / threads;
+    auto threads = int(dispatcher.threads());
+    auto threadSize = int(getSize()) / threads;
     bias.copyTo(out);
 
     if(PT_LOOP_UNROLLING_ENABLE && threadSize && threadSize % (Tensor::VectorSize * 2) == 0)
@@ -504,7 +504,7 @@ std::ostream& operator<<(std::ostream& stream, const Tensor& tensor)
 {
     const auto& dims = tensor.getDims();
     std::vector<std::size_t> steps(dims.size());
-    std::partial_sum(dims.rbegin(), dims.rend(), steps.rbegin(), std::multiplies<std::size_t>());
+    std::partial_sum(dims.rbegin(), dims.rend(), steps.rbegin(), std::multiplies<>());
 
     size_t count = 0;
 
