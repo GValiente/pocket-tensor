@@ -137,7 +137,7 @@ make
 
 The prediction time of the following models has been measured on a PC with a Intel Core i7-6500U CPU @ 2.50GHz and on a Raspberry Pi 3:
 
-### Mnist
+### MNIST CNN
 
 ```python
 model = Sequential()
@@ -160,7 +160,7 @@ model.add(Dense(10, activation='sigmoid'))
 | frugally-deep      |                 1402 |                  29298 |
 | pocket-tensor      |                 1049 |                  27329 |
 
-### Imdb
+### IMDB LSTM
 
 ```python
 model = Sequential()
