@@ -504,7 +504,7 @@ std::ostream& operator<<(std::ostream& stream, const Tensor& tensor)
 {
     const auto& dims = tensor.getDims();
     std::vector<std::size_t> steps(dims.size());
-    std::partial_sum(dims.rbegin(), dims.rend(), steps.rbegin(), std::multiplies<>());
+    std::partial_sum(dims.rbegin(), dims.rend(), steps.rbegin(), std::multiplies<std::size_t>());
 
     size_t count = 0;
 

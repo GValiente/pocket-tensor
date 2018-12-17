@@ -5,13 +5,14 @@
  * MIT License, see LICENSE file.
  */
 
-#ifndef HIKE_THREAD_POOL_H
-#define HIKE_THREAD_POOL_H
+#ifndef PT_DISPATCHER_H
+#define PT_DISPATCHER_H
 
-#include <vector>
 #include <deque>
-#include <thread>
 #include <mutex>
+#include <vector>
+#include <thread>
+#include <functional>
 #include <condition_variable>
 
 namespace pt
