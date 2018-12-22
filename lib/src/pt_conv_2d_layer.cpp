@@ -94,7 +94,7 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
+        std::array<Task, PT_MAX_CPU_THREADS> tasks;
         Dispatcher& dispatcher = layerData.dispatcher;
         auto threads = int(dispatcher.threads());
 

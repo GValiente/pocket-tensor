@@ -52,7 +52,7 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
+        std::array<Task, PT_MAX_CPU_THREADS> tasks;
         auto threads = int(dispatcher.threads());
 
         for(int taskId = 0; taskId != threads; ++taskId)
@@ -97,7 +97,7 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
+        std::array<Task, PT_MAX_CPU_THREADS> tasks;
         auto threads = int(dispatcher.threads());
 
         for(int taskId = 0; taskId != threads; ++taskId)
@@ -161,7 +161,7 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
+        std::array<Task, PT_MAX_CPU_THREADS> tasks;
         auto threads = int(dispatcher.threads());
 
         for(int taskId = 0; taskId != threads; ++taskId)
@@ -208,7 +208,7 @@ namespace
             }
         };
 
-        std::array<Task, PT_MAX_CPU_THREADS> tasks{};
+        std::array<Task, PT_MAX_CPU_THREADS> tasks;
         auto threads = int(dispatcher.threads());
 
         for(int taskId = 0; taskId != threads; ++taskId)
