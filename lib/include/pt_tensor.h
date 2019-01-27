@@ -65,10 +65,7 @@ public:
         return _dims;
     }
 
-    std::size_t getSize() const noexcept
-    {
-        return getSizeImpl(_dims);
-    }
+    std::size_t getSize() const noexcept;
 
     const DataVector& getData() const noexcept
     {
@@ -237,18 +234,6 @@ public:
 protected:
     DimsVector _dims;
     DataVector _data;
-
-    static std::size_t getSizeImpl(const DimsVector& dims) noexcept
-    {
-        std::size_t size = 1;
-
-        for(std::size_t dim : dims)
-        {
-            size *= dim;
-        }
-
-        return size;
-    }
 };
 
 }

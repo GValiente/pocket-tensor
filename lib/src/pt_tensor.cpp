@@ -281,6 +281,23 @@ std::unique_ptr<Tensor> Tensor::create(std::size_t dims, std::istream& stream)
     return tensor;
 }
 
+std::size_t Tensor::getSize() const noexcept
+{
+    std::size_t size = 0;
+
+    if(! _dims.empty())
+    {
+        ++size;
+
+        for(auto dim : _dims)
+        {
+            size *= dim;
+        }
+    }
+
+    return size;
+}
+
 void Tensor::copyTo(Tensor& other) const
 {
     other._dims.clear();
