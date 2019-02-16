@@ -107,7 +107,7 @@ std::unique_ptr<LocallyConnected1DLayer> LocallyConnected1DLayer::create(std::is
     if(! weights)
     {
         PT_LOG_ERROR << "Weights tensor parse failed" << std::endl;
-        return std::unique_ptr<LocallyConnected1DLayer>();
+        return nullptr;
     }
 
     auto biases = Tensor::create(2, stream);
@@ -115,7 +115,7 @@ std::unique_ptr<LocallyConnected1DLayer> LocallyConnected1DLayer::create(std::is
     if(! biases)
     {
         PT_LOG_ERROR << "Biases tensor parse failed" << std::endl;
-        return std::unique_ptr<LocallyConnected1DLayer>();
+        return nullptr;
     }
 
     auto activation = ActivationLayer::create(stream);
@@ -123,7 +123,7 @@ std::unique_ptr<LocallyConnected1DLayer> LocallyConnected1DLayer::create(std::is
     if(! activation)
     {
         PT_LOG_ERROR << "Activation layer parse failed" << std::endl;
-        return std::unique_ptr<LocallyConnected1DLayer>();
+        return nullptr;
     }
 
     return std::unique_ptr<LocallyConnected1DLayer>(

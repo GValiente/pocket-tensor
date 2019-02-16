@@ -10,14 +10,14 @@ from keras import backend as K
 from keras.models import Sequential
 from keras.layers import (
     Conv1D, Conv2D, LocallyConnected1D, Dense, Flatten, Activation,
-    MaxPooling2D, Dropout, BatchNormalization
+    MaxPooling2D, GlobalMaxPooling2D, Dropout, BatchNormalization
 )
 from keras.layers.recurrent import LSTM
 from keras.layers.advanced_activations import ELU, LeakyReLU
 from keras.layers.embeddings import Embedding
 from tensorflow import ConfigProto, Session
 
-from kerasify import export_model
+from pt import export_model
 
 # Fix random seed:
 np.random.seed(1)
@@ -422,6 +422,55 @@ model = Sequential([
     Dense(1)
 ])
 output_testcase(model, test_x, test_y, 'maxpool2d_3x3x3', '1e-6')
+
+
+''' Maxpooling2D 8x2x2'''
+test_x = np.random.rand(10, 10, 10, 8).astype('f')
+test_y = np.random.rand(10, 1).astype('f')
+model = Sequential([
+    MaxPooling2D(pool_size=(2, 2), input_shape=(10, 10, 8)),
+    Flatten(),
+    Dense(1)
+])
+output_testcase(model, test_x, test_y, 'maxpool2d_8x2x2', '1e-6')
+
+
+''' Maxpooling2D 8x3x3'''
+test_x = np.random.rand(10, 10, 10, 8).astype('f')
+test_y = np.random.rand(10, 1).astype('f')
+model = Sequential([
+    MaxPooling2D(pool_size=(3, 3), input_shape=(10, 10, 8)),
+    Flatten(),
+    Dense(1)
+])
+output_testcase(model, test_x, test_y, 'maxpool2d_8x3x3', '1e-6')
+
+
+''' GlobalMaxpooling2D 1'''
+test_x = np.random.rand(10, 10, 10, 1).astype('f')
+test_y = np.random.rand(10, 1).astype('f')
+model = Sequential([
+    GlobalMaxPooling2D(input_shape=(10, 10, 1))
+])
+output_testcase(model, test_x, test_y, 'global_maxpool2d_1', '1e-6')
+
+
+''' GlobalMaxpooling2D 3'''
+test_x = np.random.rand(10, 10, 10, 3).astype('f')
+test_y = np.random.rand(10, 3).astype('f')
+model = Sequential([
+    GlobalMaxPooling2D(input_shape=(10, 10, 3))
+])
+output_testcase(model, test_x, test_y, 'global_maxpool2d_3', '1e-6')
+
+
+''' GlobalMaxpooling2D 8'''
+test_x = np.random.rand(10, 10, 10, 8).astype('f')
+test_y = np.random.rand(10, 8).astype('f')
+model = Sequential([
+    GlobalMaxPooling2D(input_shape=(10, 10, 8))
+])
+output_testcase(model, test_x, test_y, 'global_maxpool2d_8', '1e-6')
 
 
 ''' LSTM simple 7x20 '''

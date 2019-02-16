@@ -107,7 +107,7 @@ std::unique_ptr<MaxPooling2DLayer> MaxPooling2DLayer::create(std::istream& strea
     if(! Parser::parse(stream, poolSizeY))
     {
         PT_LOG_ERROR << "Pool size Y parse failed" << std::endl;
-        return std::unique_ptr<MaxPooling2DLayer>();
+        return nullptr;
     }
 
     unsigned int poolSizeX = 0;
@@ -115,7 +115,7 @@ std::unique_ptr<MaxPooling2DLayer> MaxPooling2DLayer::create(std::istream& strea
     if(! Parser::parse(stream, poolSizeX))
     {
         PT_LOG_ERROR << "Pool size X parse failed" << std::endl;
-        return std::unique_ptr<MaxPooling2DLayer>();
+        return nullptr;
     }
 
     return std::unique_ptr<MaxPooling2DLayer>(new MaxPooling2DLayer(int(poolSizeY), int(poolSizeX)));
@@ -143,7 +143,7 @@ bool MaxPooling2DLayer::apply(LayerData& layerData) const
 
     if(PT_LOOP_UNROLLING_ENABLE && threadSize && threadSize % (Tensor::VectorSize * 2) == 0)
     {
-        maxImpl<VectorMax>(_poolSizeY, _poolSizeX, layerData);
+        maxImpl<Vector2Max>(_poolSizeY, _poolSizeX, layerData);
     }
     else if(threadSize && threadSize % Tensor::VectorSize == 0)
     {

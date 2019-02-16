@@ -52,7 +52,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! wi)
     {
         PT_LOG_ERROR << "wi tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto ui = Tensor::create(2, stream);
@@ -60,7 +60,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! ui)
     {
         PT_LOG_ERROR << "ui tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto bi = Tensor::create(2, stream);
@@ -68,7 +68,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! bi)
     {
         PT_LOG_ERROR << "bi tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto wf = Tensor::create(2, stream);
@@ -76,7 +76,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! wf)
     {
         PT_LOG_ERROR << "wf tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto uf = Tensor::create(2, stream);
@@ -84,7 +84,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! uf)
     {
         PT_LOG_ERROR << "uf tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto bf = Tensor::create(2, stream);
@@ -92,7 +92,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! bf)
     {
         PT_LOG_ERROR << "bf tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto wc = Tensor::create(2, stream);
@@ -100,7 +100,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! wc)
     {
         PT_LOG_ERROR << "wc tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto uc = Tensor::create(2, stream);
@@ -108,7 +108,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! uc)
     {
         PT_LOG_ERROR << "uc tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto bc = Tensor::create(2, stream);
@@ -116,7 +116,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! bc)
     {
         PT_LOG_ERROR << "bc tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto wo = Tensor::create(2, stream);
@@ -124,7 +124,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! wo)
     {
         PT_LOG_ERROR << "wo tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto uo = Tensor::create(2, stream);
@@ -132,7 +132,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! uo)
     {
         PT_LOG_ERROR << "uo tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto bo = Tensor::create(2, stream);
@@ -140,7 +140,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! bo)
     {
         PT_LOG_ERROR << "bo tensor parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto innerActivation = ActivationLayer::create(stream);
@@ -148,7 +148,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! innerActivation)
     {
         PT_LOG_ERROR << "Activation layer parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     auto activation = ActivationLayer::create(stream);
@@ -156,7 +156,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! activation)
     {
         PT_LOG_ERROR << "Activation layer parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     unsigned int returnSequences = 0;
@@ -164,7 +164,7 @@ std::unique_ptr<LstmLayer> LstmLayer::create(std::istream& stream)
     if(! Parser::parse(stream, returnSequences))
     {
         PT_LOG_ERROR << "Return sequences parse failed" << std::endl;
-        return std::unique_ptr<LstmLayer>();
+        return nullptr;
     }
 
     return std::unique_ptr<LstmLayer>(new LstmLayer(std::move(*wi), std::move(*ui), std::move(*bi),

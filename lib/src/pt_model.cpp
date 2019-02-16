@@ -23,7 +23,7 @@ std::unique_ptr<Model> Model::create(const std::string& filePath)
     if(! stream.good())
     {
         PT_LOG_ERROR << "File open failed: " << filePath << std::endl;
-        return std::unique_ptr<Model>();
+        return nullptr;
     }
 
     auto model = create(stream);
@@ -31,7 +31,7 @@ std::unique_ptr<Model> Model::create(const std::string& filePath)
     if(! model)
     {
         PT_LOG_ERROR << "File parse failed: " << filePath << std::endl;
-        return std::unique_ptr<Model>();
+        return nullptr;
     }
 
     return model;
@@ -44,13 +44,13 @@ std::unique_ptr<Model> Model::create(std::istream& stream)
     if(! Parser::parse(stream, layersCount))
     {
         PT_LOG_ERROR << "Layers count parse failed" << std::endl;
-        return std::unique_ptr<Model>();
+        return nullptr;
     }
 
     if(! layersCount)
     {
         PT_LOG_ERROR << "Invalid layers count: " << layersCount << std::endl;
-        return std::unique_ptr<Model>();
+        return nullptr;
     }
 
     std::vector<std::unique_ptr<Layer>> layers;
@@ -62,7 +62,7 @@ std::unique_ptr<Model> Model::create(std::istream& stream)
         if(! layer)
         {
             PT_LOG_ERROR << "Layer parse failed" << std::endl;
-            return std::unique_ptr<Model>();
+            return nullptr;
         }
 
         layers.push_back(std::move(layer));

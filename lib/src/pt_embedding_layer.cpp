@@ -20,7 +20,7 @@ std::unique_ptr<EmbeddingLayer> EmbeddingLayer::create(std::istream& stream)
     if(! weights)
     {
         PT_LOG_ERROR << "Weights tensor parse failed" << std::endl;
-        return std::unique_ptr<EmbeddingLayer>();
+        return nullptr;
     }
 
     return std::unique_ptr<EmbeddingLayer>(new EmbeddingLayer(std::move(*weights)));

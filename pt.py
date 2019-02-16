@@ -13,6 +13,7 @@ LAYER_LSTM = 10
 LAYER_EMBEDDING = 11
 LAYER_BATCH_NORMALIZATION = 12
 LAYER_LEAKY_RELU = 13
+LAYER_GLOBAL_MAXPOOLING_2D = 14
 
 ACTIVATION_LINEAR = 1
 ACTIVATION_RELU = 2
@@ -249,6 +250,9 @@ def export_model(model, filename):
 
             elif layer_type == 'MaxPooling2D':
                 export_layer_maxpooling2d(f, layer)
+
+            elif layer_type == 'GlobalMaxPooling2D':
+                f.write(struct.pack('I', LAYER_GLOBAL_MAXPOOLING_2D))
 
             elif layer_type == 'LSTM':
                 export_layer_lstm(f, layer)

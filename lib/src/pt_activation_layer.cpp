@@ -47,7 +47,7 @@ std::unique_ptr<ActivationLayer> ActivationLayer::create(std::istream& stream)
     if(! Parser::parse(stream, activationLayerID))
     {
         PT_LOG_ERROR << "Activation ID parse failed" << std::endl;
-        return std::unique_ptr<ActivationLayer>();
+        return nullptr;
     }
 
     std::unique_ptr<ActivationLayer> activationLayer;

@@ -101,7 +101,7 @@ std::unique_ptr<Conv1DLayer> Conv1DLayer::create(std::istream& stream)
     if(! weights)
     {
         PT_LOG_ERROR << "Weights tensor parse failed" << std::endl;
-        return std::unique_ptr<Conv1DLayer>();
+        return nullptr;
     }
 
     auto biases = Tensor::create(1, stream);
@@ -109,7 +109,7 @@ std::unique_ptr<Conv1DLayer> Conv1DLayer::create(std::istream& stream)
     if(! biases)
     {
         PT_LOG_ERROR << "Biases tensor parse failed" << std::endl;
-        return std::unique_ptr<Conv1DLayer>();
+        return nullptr;
     }
 
     auto activation = ActivationLayer::create(stream);
@@ -117,7 +117,7 @@ std::unique_ptr<Conv1DLayer> Conv1DLayer::create(std::istream& stream)
     if(! activation)
     {
         PT_LOG_ERROR << "Activation layer parse failed" << std::endl;
-        return std::unique_ptr<Conv1DLayer>();
+        return nullptr;
     }
 
     return std::unique_ptr<Conv1DLayer>(new Conv1DLayer(std::move(*weights), std::move(*biases),

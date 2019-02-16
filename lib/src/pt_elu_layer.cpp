@@ -20,7 +20,7 @@ std::unique_ptr<EluLayer> EluLayer::create(std::istream& stream)
     if(! Parser::parse(stream, alpha))
     {
         PT_LOG_ERROR << "Alpha parse failed" << std::endl;
-        return std::unique_ptr<EluLayer>();
+        return nullptr;
     }
 
     return std::unique_ptr<EluLayer>(new EluLayer(FloatType(alpha)));

@@ -33,6 +33,11 @@ set(SOURCES
     src/maxpool2d_2x2_test.cpp
     src/maxpool2d_3x2x2_test.cpp
     src/maxpool2d_3x3x3_test.cpp
+    src/maxpool2d_8x2x2_test.cpp
+    src/maxpool2d_8x3x3_test.cpp
+    src/global_maxpool2d_1_test.cpp
+    src/global_maxpool2d_3_test.cpp
+    src/global_maxpool2d_8_test.cpp
     src/relu_10_test.cpp
     src/embedding_64_test.cpp
     src/lstm_simple_7x20_test.cpp

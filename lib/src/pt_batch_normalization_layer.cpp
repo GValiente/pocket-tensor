@@ -20,7 +20,7 @@ std::unique_ptr<BatchNormalizationLayer> BatchNormalizationLayer::create(std::is
     if(! weights)
     {
         PT_LOG_ERROR << "Weights tensor parse failed" << std::endl;
-        return std::unique_ptr<BatchNormalizationLayer>();
+        return nullptr;
     }
 
     auto biases = Tensor::create(1, stream);
@@ -28,13 +28,13 @@ std::unique_ptr<BatchNormalizationLayer> BatchNormalizationLayer::create(std::is
     if(! biases)
     {
         PT_LOG_ERROR << "Biases tensor parse failed" << std::endl;
-        return std::unique_ptr<BatchNormalizationLayer>();
+        return nullptr;
     }
 
     if(weights->getDims() != biases->getDims())
     {
         PT_LOG_ERROR << "Invalid biases tensor dims" << std::endl;
-        return std::unique_ptr<BatchNormalizationLayer>();
+        return nullptr;
     }
 
     return std::unique_ptr<BatchNormalizationLayer>(

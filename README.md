@@ -58,7 +58,7 @@ make
 
 1) Use Keras to build (`model.compile(...)`) and train (`model.fit(...)`) your model as usual.
 
-2) Now convert it to the Kerasify file format with `kerasify.export_model(model, 'example.model')`.
+2) Now convert it to the pocket-tensor file format with `pt.export_model(model, 'example.model')`.
 
 3) Finally load it in C++ (`pt::create("example.model")`) and use `model->predict(...)` to perform a prediction with your data.
 
@@ -70,7 +70,7 @@ The following example shows the full workflow:
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
-from kerasify import export_model
+from pt import export_model
 
 test_x = np.random.rand(10, 10).astype('f')
 test_y = np.random.rand(10).astype('f')
@@ -121,7 +121,7 @@ The most common layer types used in image recognition and sequences prediction a
 * Convolutions: `Conv1D`, `Conv2D`, `LocallyConnected1D`.
 * Sequences related: `LSTM`, `Embedding`.
 * Activations: `Linear`, `ReLU`, `ELU`, `SeLU`, `LeakyReLU`, `Softplus`, `Softsign`, `Tanh`, `Sigmoid`, `HardSigmoid`, `Softmax`.
-* Other: `Dense`, `Flatten`, `MaxPooling2D`, `BatchNormalization`, `ELU`.
+* Other: `Dense`, `Flatten`, `MaxPooling2D`, `GlobalMaxPooling2D`, `BatchNormalization`, `ELU`.
 
 ## Performance
 

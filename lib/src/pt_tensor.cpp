@@ -227,7 +227,7 @@ std::unique_ptr<Tensor> Tensor::create(std::size_t dims, std::istream& stream)
     if(dims == 0)
     {
         PT_LOG_ERROR << "Invalid dims value: " << dims << std::endl;
-        return std::unique_ptr<Tensor>();
+        return nullptr;
     }
 
     std::unique_ptr<Tensor> tensor(new Tensor());
@@ -240,13 +240,13 @@ std::unique_ptr<Tensor> Tensor::create(std::size_t dims, std::istream& stream)
         if(! Parser::parse(stream, stride))
         {
             PT_LOG_ERROR << "Stride parse failed" << std::endl;
-            return std::unique_ptr<Tensor>();
+            return nullptr;
         }
 
         if(stride == 0)
         {
             PT_LOG_ERROR << "Invalid stride value: " << stride << std::endl;
-            return std::unique_ptr<Tensor>();
+            return nullptr;
         }
 
         tensor->_dims.push_back(stride);
@@ -261,7 +261,7 @@ std::unique_ptr<Tensor> Tensor::create(std::size_t dims, std::istream& stream)
         if(! Parser::parse(stream, data.data(), size))
         {
             PT_LOG_ERROR << "Data parse failed" << std::endl;
-            return std::unique_ptr<Tensor>();
+            return nullptr;
         }
 
         for(std::size_t index = 0; index != size; ++index)
@@ -274,7 +274,7 @@ std::unique_ptr<Tensor> Tensor::create(std::size_t dims, std::istream& stream)
         if(! Parser::parse(stream, tensor->_data.data(), size))
         {
             PT_LOG_ERROR << "Data parse failed" << std::endl;
-            return std::unique_ptr<Tensor>();
+            return nullptr;
         }
     #endif
 
