@@ -5,12 +5,13 @@ import os
 import pprint
 import re
 import errno
+import sys
 
 from keras import backend as K
 from keras.models import Sequential
 from keras.layers import (
     Conv1D, Conv2D, LocallyConnected1D, Dense, Flatten, Activation,
-    MaxPooling2D, GlobalMaxPooling2D, Dropout, BatchNormalization
+    MaxPooling2D, GlobalMaxPooling2D, BatchNormalization
 )
 from keras.layers.recurrent import LSTM
 from keras.layers.advanced_activations import ELU, LeakyReLU
@@ -28,7 +29,7 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.3
 config.gpu_options.allow_growth = True
 K.tensorflow_backend.set_session(Session(config=config))
 
-np.set_printoptions(precision=25, threshold=np.nan)
+np.set_printoptions(precision=25, threshold=sys.maxsize)
 
 src_path = 'tests/src'
 models_path = 'tests/models'
@@ -57,7 +58,6 @@ def c_array(a):
     s = re.sub(r'[, \t]*dtype=float32', '', s)
     s = s.strip()
 
-    shape = ''
     if a.shape:
         shape = repr(a.shape)
         shape = re.sub(r',*\)', '}', shape.replace('(', '{'))
@@ -151,7 +151,7 @@ output_testcase(model, test_x, test_y, 'dense_10x10x10', '1e-6')
 test_x = np.random.rand(10, 2, 1).astype('f')
 test_y = np.random.rand(10, 1).astype('f')
 model = Sequential([
-    Conv1D(1, (2), input_shape=(2, 1)),
+    Conv1D(1, 2, input_shape=(2, 1)),
     Flatten(),
     Dense(1)
 ])
@@ -162,7 +162,7 @@ output_testcase(model, test_x, test_y, 'conv1d_2', '1e-6')
 test_x = np.random.rand(10, 3, 1).astype('f').astype('f')
 test_y = np.random.rand(10, 1).astype('f')
 model = Sequential([
-    Conv1D(1, (3), input_shape=(3, 1)),
+    Conv1D(1, 3, input_shape=(3, 1)),
     Flatten(),
     Dense(1)
 ])
@@ -173,7 +173,7 @@ output_testcase(model, test_x, test_y, 'conv1d_3', '1e-6')
 test_x = np.random.rand(10, 10, 3).astype('f')
 test_y = np.random.rand(10, 1).astype('f')
 model = Sequential([
-    Conv1D(3, (3), input_shape=(10, 3)),
+    Conv1D(3, 3, input_shape=(10, 3)),
     Flatten(),
     BatchNormalization(),
     Dense(1)
@@ -219,7 +219,7 @@ output_testcase(model, test_x, test_y, 'conv_3x3x3', '1e-6')
 test_x = np.random.rand(10, 2, 1).astype('f')
 test_y = np.random.rand(10, 1).astype('f')
 model = Sequential([
-    LocallyConnected1D(1, (2), input_shape=(2, 1)),
+    LocallyConnected1D(1, 2, input_shape=(2, 1)),
     Flatten(),
     Dense(1)
 ])
@@ -230,7 +230,7 @@ output_testcase(model, test_x, test_y, 'locally_connected_1d_2', '1e-6')
 test_x = np.random.rand(10, 3, 1).astype('f').astype('f')
 test_y = np.random.rand(10, 1).astype('f')
 model = Sequential([
-    LocallyConnected1D(1, (3), input_shape=(3, 1)),
+    LocallyConnected1D(1, 3, input_shape=(3, 1)),
     Flatten(),
     Dense(1)
 ])
@@ -241,7 +241,7 @@ output_testcase(model, test_x, test_y, 'locally_connected_1d_3', '1e-6')
 test_x = np.random.rand(10, 10, 3).astype('f')
 test_y = np.random.rand(10, 1).astype('f')
 model = Sequential([
-    LocallyConnected1D(3, (3), input_shape=(10, 3)),
+    LocallyConnected1D(3, 3, input_shape=(10, 3)),
     Flatten(),
     BatchNormalization(),
     Dense(1)
@@ -511,7 +511,6 @@ test_y = np.random.rand(32, 20).astype('f')
 model = Sequential([
     Embedding(100, 64, input_length=10),
     Flatten(),
-    #Dropout(0.5),
     Dense(20, activation='sigmoid')
 ])
 output_testcase(model, test_x, test_y, 'embedding_64', '1e-6')
