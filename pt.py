@@ -227,14 +227,11 @@ def export_model(model, filename):
             elif layer_type == 'Conv1D':
                 export_layer_conv1d(f, layer)
 
-            elif layer_type == 'Conv1D':
-                export_layer_conv1d(f, layer)
-
             elif layer_type == 'Conv2D':
                 export_layer_conv2d(f, layer)
 
             elif layer_type == 'LocallyConnected1D':
-		export_layer_locally1d(f, layer)
+                export_layer_locally1d(f, layer)
 
             elif layer_type == 'Flatten':
                 f.write(struct.pack('I', LAYER_FLATTEN))
