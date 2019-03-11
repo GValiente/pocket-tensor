@@ -49,7 +49,7 @@ except OSError as e:
 
 def c_array(a):
     s = pprint.pformat(a.flatten())
-    
+
     s = re.sub(r'[ \t\n]*', '', s)
     s = re.sub(r'[ \t]*,[ \t]*', ', ', s)
     s = re.sub(r'[ \t]*\][, \t]*', '} ', s)
@@ -227,7 +227,7 @@ output_testcase(model, test_x, test_y, 'locally_connected_1d_2', '1e-6')
 
 
 ''' LocallyConnected1D 3 '''
-test_x = np.random.rand(10, 3, 1).astype('f').astype('f')
+test_x = np.random.rand(10, 3, 1).astype('f')
 test_y = np.random.rand(10, 1).astype('f')
 model = Sequential([
     LocallyConnected1D(1, 3, input_shape=(3, 1)),
