@@ -96,7 +96,7 @@ export_model(model, 'example.model')
 int main()
 {
     // Initialize model:
-    auto model = pt::create("example.model");
+    auto model = pt::Model::create("example.model");
     // REQUIRE(model);
 
     // Create input tensor:
@@ -118,10 +118,16 @@ int main()
 
 The most common layer types used in image recognition and sequences prediction are supported, making many popular model architectures possible:
 
-* Convolutions: `Conv1D`, `Conv2D`, `LocallyConnected1D`.
-* Sequences related: `LSTM`, `Embedding`.
-* Activations: `Linear`, `ReLU`, `ELU`, `SeLU`, `LeakyReLU`, `Softplus`, `Softsign`, `Tanh`, `Sigmoid`, `HardSigmoid`, `Softmax`.
-* Other: `Dense`, `Flatten`, `MaxPooling2D`, `GlobalMaxPooling2D`, `BatchNormalization`, `ELU`.
+* Core: `Dense`, `Flatten`.
+* Convolutional: `Conv1D`, `Conv2D`.
+* Pooling: `MaxPooling2D`, `GlobalMaxPooling2D`.
+* Locally-connected: `LocallyConnected1D`.
+* Recurrent: `LSTM`.
+* Embedding: `Embedding`.
+* Normalization: `BatchNormalization`.
+* Activations: `Linear`, `ReLU`, `ELU`, `SeLU`, `Softplus`, `Softsign`, `Tanh`, `Sigmoid`, `HardSigmoid`, `Softmax`.
+* Advanced activations: `LeakyReLU`, `ELU`.
+
 
 ## Performance
 
