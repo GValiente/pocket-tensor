@@ -1,4 +1,4 @@
-﻿#ifndef PT_RELU_ACTIVATION_LAYER_H
+#ifndef PT_RELU_ACTIVATION_LAYER_H
 #define PT_RELU_ACTIVATION_LAYER_H
 
 #include "pt_tensor.h"

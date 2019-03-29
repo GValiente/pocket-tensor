@@ -1,4 +1,4 @@
-﻿/*
+/*
  * pocket-tensor (c) 2018 Gustavo Valiente gustavo.valiente.m@gmail.com
  * Kerasify (c) 2016 Robert W. Rose
  *

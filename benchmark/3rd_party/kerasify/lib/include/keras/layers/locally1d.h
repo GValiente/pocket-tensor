@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2016 Robert W. Rose
  *
  * MIT License, see LICENSE file.
