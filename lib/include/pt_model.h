@@ -9,6 +9,7 @@
 #define PT_MODEL_H
 
 #include <vector>
+#include <string>
 #include "pt_layer.h"
 #include "pt_config.h"
 
