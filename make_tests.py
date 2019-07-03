@@ -7,15 +7,15 @@ import re
 import errno
 import sys
 
-from keras import backend as K
-from keras.models import Sequential
-from keras.layers import (
+from tensorflow.keras import backend as K
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import (
     Conv1D, Conv2D, LocallyConnected1D, Dense, Flatten, Activation,
     MaxPooling2D, GlobalMaxPooling2D, BatchNormalization
 )
-from keras.layers.recurrent import LSTM
-from keras.layers.advanced_activations import ELU, LeakyReLU
-from keras.layers.embeddings import Embedding
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.layers import ELU, LeakyReLU
+from tensorflow.keras.layers import Embedding
 from tensorflow import ConfigProto, Session
 
 from pt import export_model
@@ -27,7 +27,7 @@ tensorflow.set_random_seed(2)
 config = ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 0.3
 config.gpu_options.allow_growth = True
-K.tensorflow_backend.set_session(Session(config=config))
+K.set_session(Session(config=config))
 
 np.set_printoptions(precision=25, threshold=sys.maxsize)
 
