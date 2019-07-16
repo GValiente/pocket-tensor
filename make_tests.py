@@ -27,9 +27,8 @@ except:
     from tensorflow.keras.layers import LSTM
     from tensorflow.keras.layers import ELU, LeakyReLU
     from tensorflow.keras.layers import Embedding
-    from tensorflow import ConfigProto, Session
 
-
+from tensorflow import ConfigProto, Session
 from pt import export_model
 
 # Fix random seed:
