@@ -18,6 +18,7 @@ set(SOURCES
     src/pt_batch_normalization_layer.cpp
     src/pt_leaky_relu_layer.cpp
     src/pt_global_max_pooling_2d_layer.cpp
+    src/pt_repeat_vector_layer.cpp
     src/pt_model.cpp
 )
 

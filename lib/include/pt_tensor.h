@@ -1,5 +1,5 @@
 /*
- * pocket-tensor (c) 2018 Gustavo Valiente gustavo.valiente.m@gmail.com
+ * pocket-tensor (c) 2019 Gustavo Valiente gustavo.valiente@protonmail.com
  * Kerasify (c) 2016 Robert W. Rose
  *
  * MIT License, see LICENSE file.
@@ -172,6 +172,8 @@ public:
     void flatten();
 
     void unpack(std::size_t row, Tensor& out) const;
+
+    void repeat(int n, int axis, Tensor& out) const;
 
     Tensor unpack(std::size_t row) const
     {

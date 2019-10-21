@@ -5,28 +5,26 @@
  * MIT License, see LICENSE file.
  */
 
-#ifndef PT_ACTIVATION_LAYER_H
-#define PT_ACTIVATION_LAYER_H
+#ifndef PT_REPEAT_VECTOR_LAYER_H
+#define PT_REPEAT_VECTOR_LAYER_H
 
 #include "pt_layer.h"
 
 namespace pt
 {
 
-class Tensor;
-
-class ActivationLayer : public Layer
+class RepeatVectorLayer : public Layer
 {
 
 public:
-    static std::unique_ptr<ActivationLayer> create(std::istream& stream);
-
-    virtual void apply(Tensor& out) const = 0;
+    static std::unique_ptr<RepeatVectorLayer> create(std::istream& stream);
 
     bool apply(LayerData& layerData) const final;
 
 protected:
-    ActivationLayer() = default;
+    int _n;
+
+    explicit RepeatVectorLayer(int n) noexcept;
 };
 
 }

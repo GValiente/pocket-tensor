@@ -14,6 +14,8 @@ LAYER_EMBEDDING = 11
 LAYER_BATCH_NORMALIZATION = 12
 LAYER_LEAKY_RELU = 13
 LAYER_GLOBAL_MAXPOOLING_2D = 14
+LAYER_INPUT = 15
+LAYER_REPEAT_VECTOR = 16
 
 ACTIVATION_LINEAR = 1
 ACTIVATION_RELU = 2
@@ -263,6 +265,14 @@ def export_model(model, filename):
             elif layer_type == 'LeakyReLU':
                 f.write(struct.pack('I', LAYER_LEAKY_RELU))
                 f.write(struct.pack('f', layer.alpha))
+
+            elif layer_type == 'InputLayer':
+                f.write(struct.pack('I', LAYER_INPUT))
+
+            elif layer_type == 'RepeatVector':
+                f.write(struct.pack('I', LAYER_REPEAT_VECTOR))
+                n = layer.get_config()['n']
+                f.write(struct.pack('I', n))
 
             else:
                 assert False, "Unsupported layer type: %s" % layer_type

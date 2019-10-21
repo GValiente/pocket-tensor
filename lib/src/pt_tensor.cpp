@@ -394,6 +394,109 @@ void Tensor::unpack(std::size_t row, Tensor& out) const
     out._data.insert(out._data.end(), first, last);
 }
 
+void Tensor::repeat(int n, int axis, Tensor& out) const
+{
+    PT_ASSERT(isValid());
+    PT_ASSERT(n > 0);
+
+    auto numDims = _dims.size();
+    PT_ASSERT(axis < numDims);
+
+    std::vector<std::size_t> repeats(numDims, 1);
+    repeats[std::size_t(axis)] = std::size_t(n);
+
+    out._dims.clear();
+    out._dims.reserve(_dims.size());
+    out._dims.insert(out._dims.end(), _dims.begin(), _dims.end());
+    out._dims[std::size_t(axis)] = _dims[std::size_t(axis)] * std::size_t(n);
+
+    out._data.clear();
+    out._data.resize(_data.size() * std::size_t(n));
+
+    if(numDims == 1)
+    {
+        std::size_t dims0 = _dims[0];
+        std::size_t il = dims0 * repeats[0];
+
+        for(std::size_t i = 0; i < il; ++i)
+        {
+            out(i) = (*this)(i % dims0);
+        }
+    }
+    else if(numDims == 2)
+    {
+        std::size_t dims0 = _dims[0];
+        std::size_t dims1 = _dims[1];
+        std::size_t il = dims0 * repeats[0];
+        std::size_t jl = dims1 * repeats[1];
+
+        for(std::size_t i = 0; i < il; ++i)
+        {
+            std::size_t im = i % dims0;
+
+            for(std::size_t j = 0; j < jl; ++j)
+            {
+                out(i, j) = (*this)(im, j % dims1);
+            }
+        }
+    }
+    else if(numDims == 3)
+    {
+        std::size_t dims0 = _dims[0];
+        std::size_t dims1 = _dims[1];
+        std::size_t dims2 = _dims[2];
+        std::size_t il = dims0 * repeats[0];
+        std::size_t jl = dims1 * repeats[1];
+        std::size_t kl = dims2 * repeats[2];
+
+        for(std::size_t i = 0; i < il; ++i)
+        {
+            std::size_t im = i % dims0;
+
+            for(std::size_t j = 0; j < jl; ++j)
+            {
+                std::size_t jm = j % dims1;
+
+                for(std::size_t k = 0; k < kl; ++k)
+                {
+                    out(i, j, k) = (*this)(im, jm, k % dims2);
+                }
+            }
+        }
+    }
+    else
+    {
+        std::size_t dims0 = _dims[0];
+        std::size_t dims1 = _dims[1];
+        std::size_t dims2 = _dims[2];
+        std::size_t dims3 = _dims[3];
+        std::size_t il = dims0 * repeats[0];
+        std::size_t jl = dims1 * repeats[1];
+        std::size_t kl = dims2 * repeats[2];
+        std::size_t ll = dims3 * repeats[3];
+
+        for(std::size_t i = 0; i < il; ++i)
+        {
+            std::size_t im = i % dims0;
+
+            for(std::size_t j = 0; j < jl; ++j)
+            {
+                std::size_t jm = j % dims1;
+
+                for(std::size_t k = 0; k < kl; ++k)
+                {
+                    std::size_t km = k % dims2;
+
+                    for(std::size_t l = 0; l < ll; ++l)
+                    {
+                        out(i, j, k, l) = (*this)(im, jm, km, l % dims3);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void Tensor::select(std::size_t row, Tensor& out) const
 {
     unpack(row, out);

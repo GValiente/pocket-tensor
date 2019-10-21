@@ -118,7 +118,7 @@ int main()
 
 The most common layer types used in image recognition and sequences prediction are supported, making many popular model architectures possible:
 
-* Core: `Dense`, `Flatten`.
+* Core: `Input`, `Dense`, `Flatten`, `RepeatVector`.
 * Convolutional: `Conv1D`, `Conv2D`.
 * Pooling: `MaxPooling2D`, `GlobalMaxPooling2D`.
 * Locally-connected: `LocallyConnected1D`.

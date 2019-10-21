@@ -5,8 +5,8 @@
  * MIT License, see LICENSE file.
  */
 
-#ifndef PT_FLATTEN_LAYER_H
-#define PT_FLATTEN_LAYER_H
+#ifndef PT_INPUT_LAYER_H
+#define PT_INPUT_LAYER_H
 
 #include "pt_layer.h"
 #include "pt_layer_data.h"
@@ -14,18 +14,23 @@
 namespace pt
 {
 
-class FlattenLayer : public Layer
+class InputLayer : public Layer
 {
 
 public:
-    FlattenLayer() = default;
+    static std::unique_ptr<InputLayer> create(std::istream&)
+    {
+        return std::unique_ptr<InputLayer>(new InputLayer());
+    }
 
     bool apply(LayerData& layerData) const final
     {
         layerData.out = std::move(layerData.in);
-        layerData.out.flatten();
         return true;
     }
+
+protected:
+    InputLayer() = default;
 };
 
 }

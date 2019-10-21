@@ -12,21 +12,25 @@ try:
     from keras.models import Sequential
     from keras.layers import (
         Conv1D, Conv2D, LocallyConnected1D, Dense, Flatten, Activation,
-        MaxPooling2D, GlobalMaxPooling2D, BatchNormalization
+        MaxPooling2D, GlobalMaxPooling2D, BatchNormalization, RepeatVector
     )
     from keras.layers.recurrent import LSTM
     from keras.layers.advanced_activations import ELU, LeakyReLU
     from keras.layers.embeddings import Embedding
+    from keras.engine.input_layer import Input
+    from keras.models import Model
 except:
     from tensorflow.keras import backend as K
     from tensorflow.keras.models import Sequential
     from tensorflow.keras.layers import (
         Conv1D, Conv2D, LocallyConnected1D, Dense, Flatten, Activation,
-        MaxPooling2D, GlobalMaxPooling2D, BatchNormalization
+        MaxPooling2D, GlobalMaxPooling2D, BatchNormalization, RepeatVector
     )
     from tensorflow.keras.layers import LSTM
     from tensorflow.keras.layers import ELU, LeakyReLU
     from tensorflow.keras.layers import Embedding
+    from tensorflow.keras.engine.input_layer import Input
+    from tensorflow.keras.models import Model
 
 from tensorflow import ConfigProto, Session
 from pt import export_model
@@ -528,3 +532,23 @@ model = Sequential([
     Dense(20, activation='sigmoid')
 ])
 output_testcase(model, test_x, test_y, 'embedding_64', '1e-6')
+
+
+''' Input '''
+test_x = np.random.rand(10, 10).astype('f')
+test_y = np.random.rand(10).astype('f')
+a = Input(shape=(10,))
+b = Dense(1)(a)
+model = Model(inputs=a, outputs=b)
+output_testcase(model, test_x, test_y, 'input', '1e-6')
+
+
+''' RepeatVector '''
+test_x = np.random.rand(10, 32).astype('f')
+test_y = np.random.rand(10, 3, 32).astype('f')
+model = Sequential([
+    Dense(32, input_dim=32),
+    RepeatVector(3)
+])
+output_testcase(model, test_x, test_y, 'repeat_vector', '1e-6')
+

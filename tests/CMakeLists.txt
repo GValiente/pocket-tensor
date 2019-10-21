@@ -43,6 +43,8 @@ set(SOURCES
     src/lstm_simple_7x20_test.cpp
     src/lstm_simple_stacked_16x9_test.cpp
     src/lstm_stacked_64x83_test.cpp
+    src/input_test.cpp
+    src/repeat_vector_test.cpp
 )
 
 # Define data folder:

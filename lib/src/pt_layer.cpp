@@ -1,5 +1,5 @@
 /*
- * pocket-tensor (c) 2018 Gustavo Valiente gustavo.valiente.m@gmail.com
+ * pocket-tensor (c) 2019 Gustavo Valiente gustavo.valiente@protonmail.com
  * Kerasify (c) 2016 Robert W. Rose
  *
  * MIT License, see LICENSE file.
@@ -21,6 +21,8 @@
 #include "pt_batch_normalization_layer.h"
 #include "pt_leaky_relu_layer.h"
 #include "pt_global_max_pooling_2d_layer.h"
+#include "pt_repeat_vector_layer.h"
+#include "pt_input_layer.h"
 
 namespace pt
 {
@@ -41,7 +43,9 @@ namespace
         Embedding = 11,
         BatchNormalization = 12,
         LeakyRelu = 13,
-        GlobalMaxPooling2D = 14
+        GlobalMaxPooling2D = 14,
+        Input = 15,
+        RepeatVector = 16
     };
 }
 
@@ -110,6 +114,14 @@ std::unique_ptr<Layer> Layer::create(std::istream& stream)
 
     case GlobalMaxPooling2D:
         layer = GlobalMaxPooling2DLayer::create(stream);
+        break;
+
+    case Input:
+        layer = InputLayer::create(stream);
+        break;
+
+    case RepeatVector:
+        layer = RepeatVectorLayer::create(stream);
         break;
 
     default:
